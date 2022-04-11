@@ -34,7 +34,7 @@
   },
   "dependencies": {
     "@fast-csv/format": "^4.3.5",
-    "@liquid-labs/liq-handlers-lib": "file:.yalc/@liquid-labs/liq-handlers-lib",
+    "@liquid-labs/liq-handlers-lib": "^1.0.0-alpha.3",
     "js-convert-case": "^4.2.0"
   }
 }
