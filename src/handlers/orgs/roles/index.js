@@ -1,7 +1,7 @@
-import * as rolesList from './list'
+import { handlers } from './access'
+import * as getRole from './get'
+import * as listRoles from './list'
 
-const handlers = [
-  rolesList
-]
+handlers.push(getRole, listRoles)
 
 export { handlers }

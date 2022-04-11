@@ -33,6 +33,8 @@
     "@liquid-labs/catalyst-scripts": "^1.0.0-alpha.53"
   },
   "dependencies": {
-    "@liquid-labs/liq-handlers-lib": "file:.yalc/@liquid-labs/liq-handlers-lib"
+    "@fast-csv/format": "^4.3.5",
+    "@liquid-labs/liq-handlers-lib": "file:.yalc/@liquid-labs/liq-handlers-lib",
+    "js-convert-case": "^4.2.0"
   }
 }
