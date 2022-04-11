@@ -1,10 +1,15 @@
 {
   "name": "@liquid-labs/liq-roles",
   "version": "1.0.0-alpha.0",
-  "description": "",
-  "main": "index.js",
+  "description": "Adds support for company roles to to liq.",
+  "main": "dist/liq-roles.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "build": "make",
+    "lint": "make lint",
+    "lint:fix": "make lint-fix",
+    "test": "make test",
+    "preversion": "make test && make lint",
+    "postversion": "git push upstream v${npm_package_version}"
   },
   "keywords": [],
   "author": "Zane Rockenbaugh <zane@liquid-labs.com>",
@@ -18,6 +23,16 @@
   },
   "homepage": "https://github.com/Liquid-Labs/liq-roles#readme",
   "liq": {
-    "orgBase": "git@github.com:Liquid-Labs/Liquid-Labs.git"
+    "orgBase": "git@github.com:Liquid-Labs/Liquid-Labs.git",
+    "packageType": "node|server",
+    "labels": [
+      "plugin:liq-core"
+    ]
+  },
+  "devDependencies": {
+    "@liquid-labs/catalyst-scripts": "^1.0.0-alpha.53"
+  },
+  "dependencies": {
+    "@liquid-labs/liq-handlers-lib": "file:.yalc/@liquid-labs/liq-handlers-lib"
   }
 }
