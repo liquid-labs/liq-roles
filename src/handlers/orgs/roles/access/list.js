@@ -4,7 +4,7 @@ import { toKebabCase } from 'js-convert-case'
 import { initializeRolesAccess } from './_lib/roles-access-lib'
 
 const method = 'get'
-const path = '/orgs/:orgKey/roles/access' // TODO: shouldn't this actually end end a '/'?
+const path = '/orgs/:orgKey/roles/access(/list)?'
 
 const func = ({ model }) => (req, res) => {
   const { orgKey } = req.params
