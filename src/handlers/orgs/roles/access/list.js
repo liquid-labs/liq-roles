@@ -7,7 +7,7 @@ const method = 'get'
 const path = '/orgs/:orgKey/roles/access(/list)?'
 
 const func = ({ model }) => (req, res) => {
-  const { orgKey } = req.params
+  const { format='json', orgKey, transform } = req.params
   const org = model.orgs[orgKey]
   
   const rolesAccess = initializeRolesAccess(org)
@@ -17,8 +17,13 @@ const func = ({ model }) => (req, res) => {
     res.status(500).json({ message: errors.length === 1 ? errors[0] : `* ${errors.join("\n* ")}` })
     return
   }
-
-  const { format = 'json' } = req.query
+  
+  if (transorm !== undefined) {
+    return applyTransform({ model, req, res, transformName: transform,  })
+  }
+  // else, standard data list
+  formatOutput( STUFF! )
+  
   switch (format) {
     case 'json':
       res.json(rolesAccess.accessRules); break

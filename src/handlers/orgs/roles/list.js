@@ -1,35 +1,11 @@
-import { commonOutputConfig, formatOutput, getOrgFromKey } from '@liquid-labs/liq-handlers-lib'
+import { commonOutputParams, formatOutput, getOrgFromKey, paramSorter } from '@liquid-labs/liq-handlers-lib'
+
+import { commonRolesOutputParams } from './lib'
 
 const method = 'get'
 const path = '/orgs/:orgKey/roles/list'
-const parameters = [
-  {
-    name: 'fields',
-    required: false,
-    isMultivalue: true,
-    description: "An array or comma-separated list of field names."
-  },
-  {
-    name: 'noHeaders',
-    requried: false,
-    isBoolean: true,
-    description: "Excludes headers row from flat table outputs if 'false'."
-  },
-  {
-    name: 'includeIndirect',
-    required: false,
-    isBoolean: true,
-    description: "Shows the default \"fundamental\" roles referenced in requirements and base documentation which are not themselves directly part of the company's job titles or roles definitions."
-  },
-  {
-    name: 'excludeDesignated',
-    required: false,
-    isBoolean: true,
-    description: "Excludes non-titular, designated roles from the results."
-  }
-]
-const validParams = parameters.map(p => p.name)
-validParams.push('format', 'output')
+// excludeDesignated, fields, includeIndirect, noHeaders as of 2022-04-30
+const parameters = commonOutputParams().push(...commonRolesOutputParams).sort(paramSorter)
 
 const mdFormatter = (roles, title) => {
   const markdownBuf = [`# ${title}\n`]
