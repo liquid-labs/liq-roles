@@ -1,1 +1,1 @@
-export * from '/common-output-lib'
+export * from './common-output-lib'
