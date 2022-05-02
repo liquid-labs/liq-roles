@@ -1,10 +1,10 @@
-import { format as formatCSV } from '@fast-csv/format'
-import { toKebabCase } from 'js-convert-case'
+import { toCamelCase, toKebabCase } from 'js-convert-case'
 
 import { commonOutputParams, formatOutput, getOrgFromKey, paramSorter } from '@liquid-labs/liq-handlers-lib'
 
 import { initializeRolesAccess } from './_lib/roles-access-lib'
 import { commonRolesOutputParams } from '../lib'
+import * as transforms from './_transforms'
 
 const method = 'get'
 const path = '/orgs/:orgKey/roles/access(/list)?'
@@ -24,9 +24,9 @@ const func = ({ model, reporter }) => (req, res) => {
     return
   }
   
-  const { transformed, ...rest } = req.query
+  const { transform, ...rest } = req.query
   
-  return transformed === undefined
+  return transform === undefined
     ? formatOutput({
       basicTitle: 'Role Access Report', // <- ignored if 'reportTitle' set
       data: rolesAccess.accessRules,
@@ -37,72 +37,7 @@ const func = ({ model, reporter }) => (req, res) => {
       res,
       ...rest /* fields, format, output, reportTitle */
     })
-    : applyTransform({ model, req, res, transformName: transform, ...rest })
-  
-  /*
-  switch (format) {
-    case 'json':
-      res.json(rolesAccess.accessRules); break
-    case 'csv':
-      res.type('text/csv')
-      const csvStream = formatCSV()
-      csvStream.pipe(res)
-      
-      const domainRow = rolesAccess.domains.slice()
-      domainRow.unshift('')
-      csvStream.write(domainRow)
-      
-      const colWidth = domainRow.length
-      
-      for (const role of org.roles.list()) {
-        const row = Array.from({length: colWidth}, () => null)
-        row[0] = role.name
-      
-        // Fill in the rest of the row with either 'null' or an array of access rules.
-        // e.g. { domain, type, scope}
-        for (let frontierRole = role; frontierRole !== undefined; frontierRole = frontierRole.superRole) {
-          const roleName = frontierRole.name
-          const directAccessRules = rolesAccess.directRulesByRole[roleName]?.access || []
-          
-          // TODO: we could pre-index the build up across super-roles
-          for (const directAccessRule of directAccessRules) {
-            const { domain } = directAccessRule
-            const index = rolesAccess.getIndexForDomain(domain) + 1
-            const currCellEntries = row[index] || []
-            currCellEntries.push(directAccessRule)
-            row[index] = currCellEntries
-          }
-        }
-        
-        // csvStream.write(rolesAccess.accessRulesToSummaries(row))
-        const summary = rolesAccess.accessRulesToSummaries(row)
-        csvStream.write(summary)
-      } // end role iteration
-      csvStream.end()
-      res.end()
-      break
-    case 'md':
-    // TODO: to do MD right, we should 'denormalize' the JSON (rather than the rows) so we can use in CSV and here.
-      res.type('text/markdown; charset=UTF-8; variant=GFM')
-      res.send(`# Special Access by Role
-
-## Purpose and scope
-
-This document specifies which roles are granted special access to sensitive, controlled resources.
-
-## Reference
-
-* ${Object.keys(rolesAccess.accessRules).sort().map((roleName) => `[${roleName}](#${toKebabCase(roleName)})`).join("* \n")}
-
-${Object.keys(rolesAccess.accessRules).map((roleName) => `### ${roleName}
-
-NOT YET IMPLEMENTED
-`)}`)
-      break
-    default:
-      res.status(400).json({ message: `Unsupported format '${format}'.` })
-  }
-  */
+    : applyTransform({ model, org, reporter, req, res, rolesAccess, transformName: transform, ...rest })
 }
 
 const dataFlattener = ({ role, policy=[], access=[] }) => ({
@@ -113,9 +48,9 @@ const dataFlattener = ({ role, policy=[], access=[] }) => ({
 
 const mdAccessMapper = ({ domain, type, scope }) => `${scope} ${type} access to ${domain}`
 
-const mdFormatter = (roles, title) => {
+const mdFormatter = (accessRules, title) => {
   const markdownBuf = [`# ${title}\n`]
-  for (const { role, policy=[], access=[] } of roles) {
+  for (const { role, policy=[], access=[] } of accessRules) {
     markdownBuf.push(
       `## ${role}\n`,
       `Must read policies: ${policy.length === 0 ? '**NONE**': '\n- ' + policy.join('\n- ')}`,
@@ -125,6 +60,18 @@ const mdFormatter = (roles, title) => {
     )
   }
   return markdownBuf.join("\n")
+}
+
+const applyTransform = ({ res, transformName, ...transformOptions }) => {
+  const camelName = toCamelCase(transformName)
+  const transform = transforms[camelName]
+  if (transform === undefined) {
+    res.status(400)
+      .json({ message: `Uknown transform'${transformName}'; try one of: ${Object.keys(transforms).map(t => toKebabCase(t)) }` })
+    return
+  }
+  
+  transform({ res, ...transformOptions })
 }
 
 export { func, path, method }
