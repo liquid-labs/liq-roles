@@ -1,4 +1,5 @@
 import { format as formatTable } from '@fast-csv/format'
+import { toSentenceCase } from 'js-convert-case'
 
 const acceptedFormats = {
   csv: true,
@@ -25,7 +26,7 @@ const accessMatrix = ({ excludeRoleCount=false, format='csv', org, res, rolesAcc
   const tableStream = formatTable({ delimiter })
   tableStream.pipe(res)
   
-  const domainRow = rolesAccess.domains.slice()
+  const domainRow = rolesAccess.domains.map(r => toSentenceCase(r))
   if (excludeRoleCount !== true) {
     domainRow.unshift('Staff count')
   }
