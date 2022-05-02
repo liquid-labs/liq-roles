@@ -11,7 +11,7 @@ const acceptedFormats = {
 * A transform generating a "access matrix" report. The X-header is a list of domains and the Y-header is a list of
 * direct company roles.
 */
-const accessMatrix = ({ excludeRoleCount=false, format='csv', org, res, rolesAccess }) => {
+const accessMatrix = ({ allRoles=false, excludeRoleCount=false, format='csv', org, res, rolesAccess }) => {
   if (acceptedFormats[format] === undefined) {
     res.status(400).json({ message: "The 'access-matrix' transform is compatible with table formats (csv, tsv) only." })
     return
@@ -37,11 +37,18 @@ const accessMatrix = ({ excludeRoleCount=false, format='csv', org, res, rolesAcc
   const colWidth = domainRow.length
   
   for (const role of org.roles.list({ sortEmploymentStatusFirst: true })) {
+    const roleName = role.name
+    // If only reporting on 'direct' roles, then let's test if this role gets included or not.
+    if (!allRoles &&
+        org.staff.getByRoleName(roleName, { direct: true, rawData: true }).length == 0) {
+      continue
+    }
+    
     const row = Array.from({length: colWidth}, () => null)
     // the first column is the role name
-    const roleName = role.name
     row[0] = roleName
     let offset
+    // the second is the staff count, unless suppressed
     if (excludeRoleCount !== true) {
       row[1] = org.roles.getStaffInRole(roleName).length
       offset = 2
