@@ -15,7 +15,6 @@ class RolesAccessLib {
   }
   
   verifyAndIndexData() {
-    
     // TODO: It's actually more like 'roleRules'
     for (const { role, access = [], policy = [] } of this.accessRules.sort((a, b) => a.role.localeCompare(b.role))) {
       // verify the role is known
@@ -26,13 +25,19 @@ class RolesAccessLib {
       // track the unique domains; it's possible the same access is iheritted from multiple sources
       for (const { domain } of access) {
         if (this.domainsToIndexMap[domain] === undefined) {
-          this.domainsToIndexMap[domain] = this.domains.length
+          this.domainsToIndexMap[domain] = true // real index is set below after sorting this.domains.length
           this.domains.push(domain)
         }
       }
       
       this.directRulesByRole[role] = { access , policy }
     } // for this.accessRules loop
+    
+    // now, we sort the domains
+    this.domains.sort()
+    this.domains.forEach((d,i) => {
+      this.domainsToIndexMap[d] = i
+    })
   }
   
   getIndexForDomain(domain) {
