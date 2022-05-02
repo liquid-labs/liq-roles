@@ -15,14 +15,15 @@ class RolesAccessLib {
   }
   
   verifyAndIndexData() {
+    
     // TODO: It's actually more like 'roleRules'
-    for (const { role, access = [], policy = [] } of this.accessRules) {
+    for (const { role, access = [], policy = [] } of this.accessRules.sort((a, b) => a.role.localeCompare(b.role))) {
       // verify the role is known
       if (role !== 'Staff' && this.org.roles.get(role) === undefined) {
         this.errors.push(`No such role '${role}' as referenced from 'access roles'.`)
       }
       
-      // track the unique domains
+      // track the unique domains; it's possible the same access is iheritted from multiple sources
       for (const { domain } of access) {
         if (this.domainsToIndexMap[domain] === undefined) {
           this.domainsToIndexMap[domain] = this.domains.length
