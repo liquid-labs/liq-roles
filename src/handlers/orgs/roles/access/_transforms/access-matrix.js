@@ -6,7 +6,11 @@ const acceptedFormats = {
   'tab-separated-values': true
 }
 
-const accessMatrix = ({ format='csv', org, res, rolesAccess }) => {
+/**
+* A transform generating a "access matrix" report. The X-header is a list of domains and the Y-header is a list of
+* direct company roles.
+*/
+const accessMatrix = ({ excludeRoleCount=false, format='csv', org, res, rolesAccess }) => {
   if (acceptedFormats[format] === undefined) {
     res.status(400).json({ message: "The 'access-matrix' transform is compatible with table formats (csv, tsv) only." })
     return
@@ -22,15 +26,28 @@ const accessMatrix = ({ format='csv', org, res, rolesAccess }) => {
   tableStream.pipe(res)
   
   const domainRow = rolesAccess.domains.slice()
-  domainRow.unshift('')
+  if (excludeRoleCount !== true) {
+    domainRow.unshift('Staff count')
+  }
+  domainRow.unshift('Title/role')
   tableStream.write(domainRow)
   
   const colWidth = domainRow.length
   
   for (const role of org.roles.list()) {
     const row = Array.from({length: colWidth}, () => null)
-    row[0] = role.name
-  
+    // the first column is the role name
+    const roleName = role.name
+    row[0] = roleName
+    let offset
+    if (excludeRoleCount !== true) {
+      row[1] = org.roles.getStaffInRole(roleName).length
+      offset = 2
+    }
+    else {
+      offset = 1
+    }
+    
     // Fill in the rest of the row with either 'null' or an array of access rules.
     // e.g. { domain, type, scope}
     for (let frontierRole = role; frontierRole !== undefined; frontierRole = frontierRole.superRole) {
@@ -40,15 +57,14 @@ const accessMatrix = ({ format='csv', org, res, rolesAccess }) => {
       // TODO: we could pre-index the build up across super-roles
       for (const directAccessRule of directAccessRules) {
         const { domain } = directAccessRule
-        const index = rolesAccess.getIndexForDomain(domain) + 1
+        const index = rolesAccess.getIndexForDomain(domain) + offset
         const currCellEntries = row[index] || []
         currCellEntries.push(directAccessRule)
         row[index] = currCellEntries
       }
     }
     
-    // tableStream.write(rolesAccess.accessRulesToSummaries(row))
-    const summary = rolesAccess.accessRulesToSummaries(row)
+    const summary = rolesAccess.accessRulesToSummaries(row, { excludeRoleCount })
     tableStream.write(summary)
   } // end role iteration
   tableStream.end()

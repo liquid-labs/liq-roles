@@ -39,9 +39,10 @@ class RolesAccessLib {
   }
   
   // TODO: could be static, except then not visible from instance; could append, or just leave.
-  accessRulesToSummaries(row) {
+  accessRulesToSummaries(row, { excludeRoleCount = false }) {
     return row.map((e, i) => { // each row, which is a collection
       if (i === 0) return e
+      if (i === 1 && excludeRoleCount !== true) return e
       else if (e === null) {
         return ''
       }
