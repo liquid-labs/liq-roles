@@ -16,3 +16,18 @@
   backoutNotes: []
   contributors:
     - Zane Rockenbaugh <zane@liquid-labs.com>
+- startTimestamp: 2022-05-01T17:53:46.657Z
+  startEpochMillis: 1651427626657
+  issues:
+    - https://github.com/liquid-labs/liq-roles/issues/3
+  branch: 2022.05.01-zane@liquid-labs.com-incorporate_actual_roles_report
+  branchFrom: 301a449ee5b2a03c2dbd8e3ae1ed9d3bdc3276ee
+  workInitiator: zane@liquid-labs.com
+  branchInitiator: zane@liquid-labs.com
+  involvedProjects:
+    - "@liquid-labs/liq-roles"
+  changeNotes:
+    - Incorporate actual roles report
+  securityNotes: []
+  drpBcpNotes: []
+  backoutNotes: []
