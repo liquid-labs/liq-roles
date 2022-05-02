@@ -35,7 +35,7 @@ const accessMatrix = ({ excludeRoleCount=false, format='csv', org, res, rolesAcc
   
   const colWidth = domainRow.length
   
-  for (const role of org.roles.list()) {
+  for (const role of org.roles.list({ sortEmploymentStatusFirst: true })) {
     const row = Array.from({length: colWidth}, () => null)
     // the first column is the role name
     const roleName = role.name
