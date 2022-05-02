@@ -26,6 +26,7 @@ const accessMatrix = ({ excludeRoleCount=false, format='csv', org, res, rolesAcc
   const tableStream = formatTable({ delimiter })
   tableStream.pipe(res)
   
+  // This row itself is "just" the header and not referenced later, so it's OK if the domain names differ.
   const domainRow = rolesAccess.domains.map(r => toSentenceCase(r))
   if (excludeRoleCount !== true) {
     domainRow.unshift('Staff count')
