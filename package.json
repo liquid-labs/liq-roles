@@ -16,14 +16,14 @@
   "license": "UNLICENSED",
   "repository": {
     "type": "git",
-    "url": "git+ssh://git@github.com/Liquid-Labs/liq-roles.git"
+    "url": "git+ssh://git@github.com/liquid-labs/liq-roles.git"
   },
   "bugs": {
-    "url": "https://github.com/Liquid-Labs/liq-roles/issues"
+    "url": "https://github.com/liquid-labs/liq-roles/issues"
   },
-  "homepage": "https://github.com/Liquid-Labs/liq-roles#readme",
+  "homepage": "https://github.com/liquid-labs/liq-roles#readme",
   "liq": {
-    "orgBase": "git@github.com:Liquid-Labs/Liquid-Labs.git",
+    "orgBase": "git@github.com:liquid-labs/liquid-labs.git",
     "packageType": "node|server",
     "labels": [
       "plugin:liq-core"
@@ -34,7 +34,7 @@
   },
   "dependencies": {
     "@fast-csv/format": "^4.3.5",
-    "@liquid-labs/liq-handlers-lib": "^1.0.0-alpha.3",
+    "@liquid-labs/liq-handlers-lib": "^1.0.0-alpha.4",
     "js-convert-case": "^4.2.0"
   }
 }

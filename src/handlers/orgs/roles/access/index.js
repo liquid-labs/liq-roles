@@ -1,7 +1,7 @@
-import * as getRolesAccess from './get'
+import * as listRolesAccess from './list'
 
 const handlers = [
-  getRolesAccess
+  listRolesAccess
 ]
 
 export { handlers }

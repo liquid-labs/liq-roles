@@ -1,37 +1,48 @@
+// TODO: this stuff should be moved into a orgs-model plugin... once that's supported
 class RolesAccessLib {
   constructor(org) {
     // initializes:
     // this.accessRules,
     // this.domainServices
-    Object.assign(this, org.innerState.roleAccess)
+    Object.assign(this, org.innerState.rolesAccess)
     org.rolesAccess = this
     this.org = org
     
     this.directRulesByRole = {}
     this.domains = []
     this.domainsToIndexMap = {}
-    this.errors = []
     this.verifyAndIndexData()
   }
   
   verifyAndIndexData() {
+    const errors = []
     // TODO: It's actually more like 'roleRules'
-    for (const { role, access = [], policy = [] } of this.accessRules) {
+    for (const { role, access = [], policy = [] } of this.accessRules.sort((a, b) => a.role.localeCompare(b.role))) {
       // verify the role is known
-      if (role !== 'Staff' && this.org.roles.get(role) === undefined) {
-        this.errors.push(`No such role '${role}' as referenced from 'access roles'.`)
+      if (this.org.roles.get(role, { rawData: true }) === undefined) {
+        errors.push(`No such role '${role}' as referenced from 'access roles'.`)
       }
       
-      // track the unique domains
+      // track the unique domains; it's possible the same access is iheritted from multiple sources
       for (const { domain } of access) {
         if (this.domainsToIndexMap[domain] === undefined) {
-          this.domainsToIndexMap[domain] = this.domains.length
+          this.domainsToIndexMap[domain] = true // real index is set below after sorting this.domains.length
           this.domains.push(domain)
         }
       }
       
       this.directRulesByRole[role] = { access , policy }
     } // for this.accessRules loop
+    
+    // now, we sort the domains
+    this.domains.sort()
+    this.domains.forEach((d,i) => {
+      this.domainsToIndexMap[d] = i
+    })
+    
+    if (errors.length > 0) {
+      throw new Error('There were errors loading the access rules: ' + errors.join(' '))
+    }
   }
   
   getIndexForDomain(domain) {
@@ -39,9 +50,10 @@ class RolesAccessLib {
   }
   
   // TODO: could be static, except then not visible from instance; could append, or just leave.
-  accessRulesToSummaries(row) {
+  accessRulesToSummaries(row, { excludeRoleCount = false }) {
     return row.map((e, i) => { // each row, which is a collection
       if (i === 0) return e
+      if (i === 1 && excludeRoleCount !== true) return e
       else if (e === null) {
         return ''
       }
@@ -99,9 +111,12 @@ const accessRank = ({ type, scope }) => {
   return result
 }
 
-const initializeRolesAccess = (org) =>
-  org.rolesAccess instanceof RolesAccessLib
-    ? org.rolesAccess
-    : new RolesAccessLib(org)
+const initializeRolesAccess = (org) => {
+  if (!org.rolesAccess || !(org.rolesAccess instanceof RolesAccessLib)) {
+    // TODO: this is a workaround until we load the access model into the orgs model from here as a plugin
+    org.rolesAccess = new RolesAccessLib(org)
+  }
+  return org.rolesAccess
+}
 
 export { initializeRolesAccess }
