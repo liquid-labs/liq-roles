@@ -10,6 +10,12 @@ const method = 'get'
 const path = '/orgs/:orgKey/roles/access(/list)?'
 const parameters = commonOutputParams()
 parameters.push(...commonRolesOutputParams)
+parameters.push({
+  name: 'includeSource',
+  required: false,
+  isBoolean: true,
+  description: "If true, then will indicate the role directly granting access, where applicable."
+})
 
 const func = ({ model, reporter }) => (req, res) => {
   const org = getOrgFromKey({ model, params: req.params, res })

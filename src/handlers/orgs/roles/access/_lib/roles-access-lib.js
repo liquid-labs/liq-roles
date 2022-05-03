@@ -50,7 +50,7 @@ class RolesAccessLib {
   }
   
   // TODO: could be static, except then not visible from instance; could append, or just leave.
-  accessRulesToSummaries(row, { excludeRoleCount = false }) {
+  accessRulesToSummaries(row, { excludeRoleCount=false, includeSource=false }) {
     return row.map((e, i) => { // each row, which is a collection
       if (i === 0) return e
       if (i === 1 && excludeRoleCount !== true) return e
@@ -68,13 +68,16 @@ class RolesAccessLib {
         
         let priorRule = null
         e = e.filter((ar) => {
-          const { rank, scope } = ar
+          const { rank, scope, type } = ar
           const priorRank = priorRule?.rank
+          const priorType = priorRule?.type
           // updates prior rule and returns true if it can pass the gauntlet
           // always keep the first rule and if the prior rule has a (+) rank and the curr rule (-), it's of a
           // different kind and we keep
-          if (priorRule !== null && !(priorRank > 0 && rank < 0)) {
-            const priorTypeRank = Math.floor(priorRank / 2)
+          if (priorRule !== null
+              && !(priorRank > 0 && rank < 0)
+          ) {
+            const priorTypeRank = Math.floor(priorRank / 2) // TODO: why divide by 2?
             const currTypeRank = Math.floor(rank / 2)
             const { scope: priorScope } = priorRule
             // if curr and prior rules are the same or same type, then discard the curr, possibly smaller scope rule
@@ -90,7 +93,7 @@ class RolesAccessLib {
           return true
         })
 
-        return e.map(({ type, scope }) => {
+        return e.map(({ type, scope, source }) => {
           let scopeDesc
           switch (scope) {
             case 'unlimited':
@@ -102,7 +105,7 @@ class RolesAccessLib {
             default:
               throw new Error(`Uknown scope '${scope}' specified in access.`)
           }
-          return `${scopeDesc} ${type}`
+          return `${scopeDesc} ${type}${includeSource ? ` (${source})` : ''}`
         }).join('; ')
       }
     })
@@ -115,7 +118,7 @@ const accessRank = ({ type, scope }) => {
     case 'reader': result = 2; break
     case 'editor': result = 4; break
     case 'manager': result = 6; break
-    case 'access-manager': result = -2; break
+    case 'access-manager': result = -10; break
     default: throw new Error(`Found unknown access type '${type}'`)
   }
   if (scope === 'unlimited') result += 2

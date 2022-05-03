@@ -11,7 +11,15 @@ const acceptedFormats = {
 * A transform generating a "access matrix" report. The X-header is a list of domains and the Y-header is a list of
 * direct company roles.
 */
-const accessMatrix = ({ allRoles=false, excludeRoleCount=false, format='csv', org, res, rolesAccess }) => {
+const accessMatrix = ({
+  allRoles=false,
+  excludeRoleCount=false,
+  format='csv',
+  includeSource=false,
+  org,
+  res,
+  rolesAccess
+}) => {
   if (acceptedFormats[format] === undefined) {
     res.status(400).json({ message: "The 'access-matrix' transform is compatible with table formats (csv, tsv) only." })
     return
@@ -67,6 +75,7 @@ const accessMatrix = ({ allRoles=false, excludeRoleCount=false, format='csv', or
       
         // TODO: we could pre-index the build up across super-roles
         for (const directAccessRule of directAccessRules) {
+          directAccessRule.source = baseRole
           const { domain } = directAccessRule
           const index = rolesAccess.getIndexForDomain(domain) + offset
           const currCellEntries = row[index] || []
@@ -76,7 +85,7 @@ const accessMatrix = ({ allRoles=false, excludeRoleCount=false, format='csv', or
       }
     }
     
-    const summary = rolesAccess.accessRulesToSummaries(row, { excludeRoleCount })
+    const summary = rolesAccess.accessRulesToSummaries(row, { excludeRoleCount, includeSource })
     tableStream.write(summary)
   } // end role iteration
   tableStream.end()
