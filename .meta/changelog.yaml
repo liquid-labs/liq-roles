@@ -8,7 +8,6 @@
   branchInitiator: zane@liquid-labs.com
   involvedProjects:
     - "@liquid-labs/liq-roles"
-    - "@liquid-labs/liq-core"
   changeNotes:
     - Implement basic list with visible roles support
   securityNotes: []
