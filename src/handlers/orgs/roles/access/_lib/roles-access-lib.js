@@ -76,12 +76,13 @@ class RolesAccessLib {
           if (priorRule !== null && !(priorRank > 0 && rank < 0)) {
             const priorTypeRank = Math.floor(priorRank / 2)
             const currTypeRank = Math.floor(rank / 2)
+            const { scope: priorScope } = priorRule
             // if curr and prior rules are the same or same type, then discard the curr, possibly smaller scope rule
             if (priorTypeRank === currTypeRank) return false
             // else, the curr rule is a lower rank, so if the higher rank is unlimited, we don't need it
-            else if (priorRule.scope === 'unlimited') return false
-            // and if neither are unlimited, then we don't need the lower rank rule either
-            else if (scope !== 'unlimited') return false
+            else if (priorScope === 'unlimited' || (priorScope === 'limited' && scope === 'dev')) return false
+            // and if neither are unlimited or higher, then we don't need the lower rank rule either
+            else if (scope !== priorScope) return false
             // otherwise we keep it
           }
           
@@ -89,9 +90,20 @@ class RolesAccessLib {
           return true
         })
 
-        return e.map(({ type, scope }) =>
-            `${type}${scope === 'unlimited' ? '*' : ''}`
-          ).join('; ')
+        return e.map(({ type, scope }) => {
+          let scopeDesc
+          switch (scope) {
+            case 'unlimited':
+              scopeDesc = 'prod'; break
+            case 'limited':
+              scopeDesc = 'specified prod'; break
+            case 'dev':
+              scopeDesc = 'dev'; break;
+            default:
+              throw new Error(`Uknown scope '${scope}' specified in access.`)
+          }
+          return `${scopeDesc} ${type}`
+        }).join('; ')
       }
     })
   }
@@ -106,7 +118,8 @@ const accessRank = ({ type, scope }) => {
     case 'access-manager': result = -2; break
     default: throw new Error(`Found unknown access type '${type}'`)
   }
-  if (scope === 'unlimited') result += 1
+  if (scope === 'unlimited') result += 2
+  else if (scope === 'limited') result +=1
   
   return result
 }
