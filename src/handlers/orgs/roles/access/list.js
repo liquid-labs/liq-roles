@@ -18,11 +18,6 @@ const func = ({ model, reporter }) => (req, res) => {
   }
   
   const rolesAccess = initializeRolesAccess(org)
-  const { errors } = rolesAccess
-  if (errors.length > 0) {
-    res.status(500).json({ message: errors.length === 1 ? errors[0] : `* ${errors.join("\n* ")}` })
-    return
-  }
   
   const { transform, ...rest } = req.query
   

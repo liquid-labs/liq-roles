@@ -36,11 +36,11 @@ const accessMatrix = ({ allRoles=false, excludeRoleCount=false, format='csv', or
   
   const colWidth = domainRow.length
   
-  for (const role of org.roles.list({ sortEmploymentStatusFirst: true })) {
+  for (const role of org.roles.list({ sortEmploymentStatusFirst: true, includeIndirect: false })) {
     const roleName = role.name
     // If only reporting on 'direct' roles, then let's test if this role gets included or not.
     if (!allRoles &&
-        org.staff.getByRoleName(roleName, { direct: true, rawData: true }).length == 0) {
+        org.staff.getByRoleName(roleName, { ownRole: true, rawData: true }).length == 0) {
       continue
     }
     
@@ -59,17 +59,20 @@ const accessMatrix = ({ allRoles=false, excludeRoleCount=false, format='csv', or
     
     // Fill in the rest of the row with either 'null' or an array of access rules.
     // e.g. { domain, type, scope}
-    for (let frontierRole = role; frontierRole !== undefined; frontierRole = frontierRole.superRole) {
-      const roleName = frontierRole.name
-      const directAccessRules = rolesAccess.directRulesByRole[roleName]?.access || []
+/*    for (let frontierRole = role; frontierRole !== undefined; frontierRole = frontierRole.superRole) {
+      const roleName = frontierRole.name*/
+    for (const baseRole of Object.keys(rolesAccess.directRulesByRole)) {
+      if (role.impliesRole(baseRole)) {
+        const directAccessRules = rolesAccess.directRulesByRole[baseRole]?.access || []
       
-      // TODO: we could pre-index the build up across super-roles
-      for (const directAccessRule of directAccessRules) {
-        const { domain } = directAccessRule
-        const index = rolesAccess.getIndexForDomain(domain) + offset
-        const currCellEntries = row[index] || []
-        currCellEntries.push(directAccessRule)
-        row[index] = currCellEntries
+        // TODO: we could pre-index the build up across super-roles
+        for (const directAccessRule of directAccessRules) {
+          const { domain } = directAccessRule
+          const index = rolesAccess.getIndexForDomain(domain) + offset
+          const currCellEntries = row[index] || []
+          currCellEntries.push(directAccessRule)
+          row[index] = currCellEntries
+        }
       }
     }
     

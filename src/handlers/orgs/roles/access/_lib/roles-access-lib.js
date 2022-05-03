@@ -1,25 +1,26 @@
+// TODO: this stuff should be moved into a orgs-model plugin... once that's supported
 class RolesAccessLib {
   constructor(org) {
     // initializes:
     // this.accessRules,
     // this.domainServices
-    Object.assign(this, org.innerState.roleAccess)
+    Object.assign(this, org.innerState.rolesAccess)
     org.rolesAccess = this
     this.org = org
     
     this.directRulesByRole = {}
     this.domains = []
     this.domainsToIndexMap = {}
-    this.errors = []
     this.verifyAndIndexData()
   }
   
   verifyAndIndexData() {
+    const errors = []
     // TODO: It's actually more like 'roleRules'
     for (const { role, access = [], policy = [] } of this.accessRules.sort((a, b) => a.role.localeCompare(b.role))) {
       // verify the role is known
-      if (role !== 'Staff' && this.org.roles.get(role) === undefined) {
-        this.errors.push(`No such role '${role}' as referenced from 'access roles'.`)
+      if (this.org.roles.get(role, { rawData: true }) === undefined) {
+        errors.push(`No such role '${role}' as referenced from 'access roles'.`)
       }
       
       // track the unique domains; it's possible the same access is iheritted from multiple sources
@@ -38,6 +39,10 @@ class RolesAccessLib {
     this.domains.forEach((d,i) => {
       this.domainsToIndexMap[d] = i
     })
+    
+    if (errors.length > 0) {
+      throw new Error('There were errors loading the access rules: ' + errors.join(' '))
+    }
   }
   
   getIndexForDomain(domain) {
@@ -106,9 +111,12 @@ const accessRank = ({ type, scope }) => {
   return result
 }
 
-const initializeRolesAccess = (org) =>
-  org.rolesAccess instanceof RolesAccessLib
-    ? org.rolesAccess
-    : new RolesAccessLib(org)
+const initializeRolesAccess = (org) => {
+  if (!org.rolesAccess || !(org.rolesAccess instanceof RolesAccessLib)) {
+    // TODO: this is a workaround until we load the access model into the orgs model from here as a plugin
+    org.rolesAccess = new RolesAccessLib(org)
+  }
+  return org.rolesAccess
+}
 
 export { initializeRolesAccess }
