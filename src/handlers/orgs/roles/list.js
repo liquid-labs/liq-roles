@@ -1,4 +1,4 @@
-import { commonOutputParams, formatOutput, getOrgFromKey, paramSorter } from '@liquid-labs/liq-handlers-lib'
+import { commonOutputConfig, commonOutputParams, formatOutput, getOrgFromKey, paramSorter } from '@liquid-labs/liq-handlers-lib'
 
 import { commonRolesOutputParams } from './lib'
 
