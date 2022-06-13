@@ -74,12 +74,10 @@ class RolesAccessLib {
           // updates prior rule and returns true if it can pass the gauntlet
           // always keep the first rule and if the prior rule has a (+) rank and the curr rule (-), it's of a
           // different kind and we keep
-          if (priorRule !== null
-              && !(priorRank > 0 && rank < 0)
-          ) {
+          if (priorRule !== null && !(priorRank > 0 && rank < 0)) {
             const priorTypeRank = Math.floor(priorRank / 2) // TODO: why divide by 2?
             const currTypeRank = Math.floor(rank / 2)
-            if (priorTypeRank === currTypeRank) return false
+            if (priorTypeRank >= currTypeRank) return false
             // otherwise we keep it
           }
           
