@@ -7,6 +7,9 @@ const acceptedFormats = {
   'tab-separated-values': true
 }
 
+// TODO: copied from liq-policy/src/liq-gen-roles-ref/lib/helpers.js
+const headerRef = (roleName) => roleName.toLowerCase().replace(/[^\w -]*/g, '').replace(/ /g, '-')
+
 /**
 * A transform generating a "access matrix" report. The X-header is a list of serviceBundles and the Y-header is a list of
 * direct company roles.
@@ -55,7 +58,7 @@ const accessMatrix = ({
     
     const row = Array.from({length: colWidth}, () => null)
     // the first column is the role name
-    row[0] = roleName
+    row[0] = `=HYPERLINK("${org.innerState.settings.s.policies.POLICY_WEB_ROOT}/staff/Company%20Jobs%20and%20Roles%20Reference.md#${headerRef(roleName)}", "${roleName}")`
     let offset
     // the second is the staff count, unless suppressed
     if (excludeRoleCount !== true) {
