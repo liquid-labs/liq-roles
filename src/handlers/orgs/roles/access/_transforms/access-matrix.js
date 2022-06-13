@@ -48,7 +48,7 @@ const accessMatrix = ({
   
   const colWidth = serviceBundleRow.length
   
-  for (const role of org.roles.list({ sortEmploymentStatusFirst: true, includeIndirect: false, ...rest })) {
+  for (const role of org.roles.list({ sortFunc: sortRoleByAccessAndAlpha, ...rest })) {
     const roleName = role.name
     // If only reporting on 'direct' roles, then let's test if this role gets included or not.
     if (!allRoles &&
@@ -94,6 +94,21 @@ const accessMatrix = ({
   } // end role iteration
   tableStream.end()
   res.end()
+}
+
+const sortRoleByAccessAndAlpha = (a, b) => {
+  const aHasAccess = Object.keys(a.getAccess()).length > 0
+  const bHasAccess = Object.keys(b.getAccess()).length > 0
+  
+  if (aHasAccess === bHasAccess) {
+    return a.name.localeCompare(b.name)
+  }
+  else if (aHasAccess) {
+    return -1
+  }
+  else {
+    return 1
+  }
 }
 
 export {
