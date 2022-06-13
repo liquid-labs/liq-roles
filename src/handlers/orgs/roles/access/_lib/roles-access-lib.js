@@ -3,14 +3,14 @@ class RolesAccessLib {
   constructor(org) {
     // initializes:
     // this.accessRules,
-    // this.domainServices
+    // this.serviceBundles
     Object.assign(this, org.innerState.rolesAccess)
     org.rolesAccess = this
     this.org = org
     
     this.directRulesByRole = {}
-    this.domains = []
-    this.domainsToIndexMap = {}
+    this.serviceBundles = []
+    this.serviceBundlesToIndexMap = {}
     this.verifyAndIndexData()
   }
   
@@ -23,21 +23,21 @@ class RolesAccessLib {
         errors.push(`No such role '${role}' as referenced from 'access roles'.`)
       }
       
-      // track the unique domains; it's possible the same access is iheritted from multiple sources
-      for (const { domain } of access) {
-        if (this.domainsToIndexMap[domain] === undefined) {
-          this.domainsToIndexMap[domain] = true // real index is set below after sorting this.domains.length
-          this.domains.push(domain)
+      // track the unique serviceBundles; it's possible the same access is iheritted from multiple sources
+      for (const { serviceBundle } of access) {
+        if (this.serviceBundlesToIndexMap[serviceBundle] === undefined) {
+          this.serviceBundlesToIndexMap[serviceBundle] = true // real index is set below after sorting this.serviceBundles.length
+          this.serviceBundles.push(serviceBundle)
         }
       }
       
       this.directRulesByRole[role] = { access , policy }
     } // for this.accessRules loop
     
-    // now, we sort the domains
-    this.domains.sort()
-    this.domains.forEach((d,i) => {
-      this.domainsToIndexMap[d] = i
+    // now, we sort the serviceBundles
+    this.serviceBundles.sort()
+    this.serviceBundles.forEach((d,i) => {
+      this.serviceBundlesToIndexMap[d] = i
     })
     
     if (errors.length > 0) {
@@ -45,8 +45,8 @@ class RolesAccessLib {
     }
   }
   
-  getIndexForDomain(domain) {
-    return this.domainsToIndexMap[domain]
+  getIndexForDomain(serviceBundle) {
+    return this.serviceBundlesToIndexMap[serviceBundle]
   }
   
   // TODO: could be static, except then not visible from instance; could append, or just leave.
@@ -68,7 +68,7 @@ class RolesAccessLib {
         
         let priorRule = null
         e = e.filter((ar) => {
-          const { rank, scope, type } = ar
+          const { rank, type } = ar
           const priorRank = priorRule?.rank
           const priorType = priorRule?.type
           // updates prior rule and returns true if it can pass the gauntlet
@@ -79,13 +79,7 @@ class RolesAccessLib {
           ) {
             const priorTypeRank = Math.floor(priorRank / 2) // TODO: why divide by 2?
             const currTypeRank = Math.floor(rank / 2)
-            const { scope: priorScope } = priorRule
-            // if curr and prior rules are the same or same type, then discard the curr, possibly smaller scope rule
             if (priorTypeRank === currTypeRank) return false
-            // else, the curr rule is a lower rank, so if the higher rank is unlimited, we don't need it
-            else if (priorScope === 'unlimited' || (priorScope === 'limited' && scope === 'dev')) return false
-            // and if neither are unlimited or higher, then we don't need the lower rank rule either
-            else if (scope !== priorScope) return false
             // otherwise we keep it
           }
           
@@ -93,36 +87,24 @@ class RolesAccessLib {
           return true
         })
 
-        return e.map(({ type, scope, source }) => {
-          let scopeDesc
-          switch (scope) {
-            case 'unlimited':
-              scopeDesc = 'prod'; break
-            case 'limited':
-              scopeDesc = 'specified prod'; break
-            case 'dev':
-              scopeDesc = 'dev'; break;
-            default:
-              throw new Error(`Uknown scope '${scope}' specified in access.`)
-          }
-          return `${scopeDesc} ${type}${includeSource ? ` (${source})` : ''}`
+        return e.map(({ type, source }) => {
+          return `${type}${includeSource ? ` (${source})` : ''}`
         }).join('; ')
       }
     })
   }
 }
 
-const accessRank = ({ type, scope }) => {
+const accessRank = ({ type }) => {
   let result = 0
   switch (type) {
     case 'reader': result = 2; break
     case 'editor': result = 4; break
     case 'manager': result = 6; break
+    case 'admin': result = 8; break
     case 'access-manager': result = -10; break
     default: throw new Error(`Found unknown access type '${type}'`)
   }
-  if (scope === 'unlimited') result += 2
-  else if (scope === 'limited') result +=1
   
   return result
 }

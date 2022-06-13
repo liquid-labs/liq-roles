@@ -44,10 +44,10 @@ const func = ({ model, reporter }) => (req, res) => {
 const dataFlattener = ({ role, policy=[], access=[] }) => ({
   role,
   policy: policy.join(';'),
-  access: access.map(({ domain, type, scope }) => `${domain}/${scope}/${type}`)
+  access: access.map(({ serviceBundle, type }) => `${serviceBundle}/${type}`)
 })
 
-const mdAccessMapper = ({ domain, type, scope }) => `${scope} ${type} access to ${domain}`
+const mdAccessMapper = ({ serviceBundle, type }) => `${type} access to ${serviceBundle}`
 
 const mdFormatter = (accessRules, title) => {
   const markdownBuf = [`# ${title}\n`]

@@ -8,7 +8,7 @@ const acceptedFormats = {
 }
 
 /**
-* A transform generating a "access matrix" report. The X-header is a list of domains and the Y-header is a list of
+* A transform generating a "access matrix" report. The X-header is a list of serviceBundles and the Y-header is a list of
 * direct company roles.
 */
 const accessMatrix = ({
@@ -18,7 +18,8 @@ const accessMatrix = ({
   includeSource=false,
   org,
   res,
-  rolesAccess
+  rolesAccess,
+  ...rest
 }) => {
   if (acceptedFormats[format] === undefined) {
     res.status(400).json({ message: "The 'access-matrix' transform is compatible with table formats (csv, tsv) only." })
@@ -34,17 +35,17 @@ const accessMatrix = ({
   const tableStream = formatTable({ delimiter })
   tableStream.pipe(res)
   
-  // This row itself is "just" the header and not referenced later, so it's OK if the domain names differ.
-  const domainRow = rolesAccess.domains.map(r => toSentenceCase(r))
+  // This row itself is "just" the header and not referenced later, so it's OK if the serviceBundle names differ.
+  const serviceBundleRow = rolesAccess.serviceBundles.map(r => toSentenceCase(r))
   if (excludeRoleCount !== true) {
-    domainRow.unshift('Staff #')
+    serviceBundleRow.unshift('Staff #')
   }
-  domainRow.unshift('Title/role')
-  tableStream.write(domainRow)
+  serviceBundleRow.unshift('Title/role')
+  tableStream.write(serviceBundleRow)
   
-  const colWidth = domainRow.length
+  const colWidth = serviceBundleRow.length
   
-  for (const role of org.roles.list({ sortEmploymentStatusFirst: true, includeIndirect: false })) {
+  for (const role of org.roles.list({ sortEmploymentStatusFirst: true, includeIndirect: false, ...rest })) {
     const roleName = role.name
     // If only reporting on 'direct' roles, then let's test if this role gets included or not.
     if (!allRoles &&
@@ -66,7 +67,7 @@ const accessMatrix = ({
     }
     
     // Fill in the rest of the row with either 'null' or an array of access rules.
-    // e.g. { domain, type, scope}
+    // e.g. { serviceBundle, type }
 /*    for (let frontierRole = role; frontierRole !== undefined; frontierRole = frontierRole.superRole) {
       const roleName = frontierRole.name*/
     for (const baseRole of Object.keys(rolesAccess.directRulesByRole)) {
@@ -76,8 +77,8 @@ const accessMatrix = ({
         // TODO: we could pre-index the build up across super-roles
         for (const directAccessRule of directAccessRules) {
           directAccessRule.source = baseRole
-          const { domain } = directAccessRule
-          const index = rolesAccess.getIndexForDomain(domain) + offset
+          const { serviceBundle } = directAccessRule
+          const index = rolesAccess.getIndexForDomain(serviceBundle) + offset
           const currCellEntries = row[index] || []
           currCellEntries.push(directAccessRule)
           row[index] = currCellEntries
