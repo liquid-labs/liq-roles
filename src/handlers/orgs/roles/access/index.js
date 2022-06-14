@@ -1,7 +1,7 @@
+import { handlers } from './serviceBundles'
+
 import * as listRolesAccess from './list'
 
-const handlers = [
-  listRolesAccess
-]
+handlers.push(listRolesAccess)
 
 export { handlers }
