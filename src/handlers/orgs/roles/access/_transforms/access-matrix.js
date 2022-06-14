@@ -38,8 +38,16 @@ const accessMatrix = ({
   const tableStream = formatTable({ delimiter })
   tableStream.pipe(res)
   
+  const { directRulesByRole, serviceBundles } = rolesAccess
   // This row itself is "just" the header and not referenced later, so it's OK if the serviceBundle names differ.
-  const serviceBundleRow = rolesAccess.serviceBundles.map(r => toSentenceCase(r))
+  const serviceBundleRow = serviceBundles.map(r =>
+    `=HYPERLINK("#gid=${org.innerState.settings.s.security.ACCESS_MATRIX_BUNDLES_SHEET_GID}range=A${serviceBundles.indexOf(r) + 2}","${r}")`)
+    /* originally did the following, but when imported, it wouldn't recognize the hyperlink even though entering the
+       formula works
+    `=HYPERLINK("#gid=${org.innerState.settings.s.security.ACCESS_MATRIX_BUNDLES_SHEET_GID}range=A"&(MATCH(LOWER("${r}"),ARRAYFORMULA(LOWER('Service bundles'!A2:A)),0)+1),"${r}")`)
+    */
+  // =HYPERLINK("#gid=1029216696range=A"&MATCH(LOWER("MOCA Admin Portal"),ARRAYFORMULA(LOWER('Service bundles'!A2:A)),0)+1, "Moca admin portal")
+  
   if (excludeRoleCount !== true) {
     serviceBundleRow.unshift('Staff #')
   }
@@ -73,9 +81,9 @@ const accessMatrix = ({
     // e.g. { serviceBundle, type }
 /*    for (let frontierRole = role; frontierRole !== undefined; frontierRole = frontierRole.superRole) {
       const roleName = frontierRole.name*/
-    for (const baseRole of Object.keys(rolesAccess.directRulesByRole)) {
+    for (const baseRole of Object.keys(directRulesByRole)) {
       if (role.impliesRole(baseRole)) {
-        const directAccessRules = rolesAccess.directRulesByRole[baseRole]?.access || []
+        const directAccessRules = directRulesByRole[baseRole]?.access || []
       
         // TODO: we could pre-index the build up across super-roles
         for (const directAccessRule of directAccessRules) {
