@@ -35,7 +35,7 @@ class RolesAccessLib {
     } // for this.accessRules loop
     
     // now, we sort the serviceBundles
-    this.serviceBundles.sort()
+    this.serviceBundles.sort((a,b) => a.toLowerCase().localeCompare(b.toLowerCase()))
     this.serviceBundles.forEach((d,i) => {
       this.serviceBundlesToIndexMap[d] = i
     })
