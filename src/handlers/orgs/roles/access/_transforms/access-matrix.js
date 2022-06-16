@@ -60,7 +60,7 @@ const accessMatrix = ({
     const roleName = role.name
     // If only reporting on 'direct' roles, then let's test if this role gets included or not.
     if (!allRoles &&
-        org.staff.getByRoleName(roleName, { ownRole: true, rawData: true }).length == 0) {
+        org.staff.getByRoleName(roleName, { ownRole: true, rawData: true }).length === 0) {
       continue
     }
     
