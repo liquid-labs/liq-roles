@@ -9,11 +9,16 @@ class RolesAccessLib {
     this.org = org
     
     this.directRulesByRole = {}
-    this.serviceBundles = []
-    this.serviceBundlesToIndexMap = {}
+    this.serviceBundleNames = []
+    this.serviceBundlesToOrdering = {}
     this.verifyAndIndexData()
   }
   
+  /**
+  * - Ensures the access roles are valid.
+  * - Sorts the serviceBundles and caches their alpha ordered position in 'serviceBundlesToOrdering'.
+  * - Collects 'serviceBundleNames' of the service bundles actually referenced in the access rules.
+  */
   verifyAndIndexData() {
     const errors = []
     // TODO: It's actually more like 'roleRules'
@@ -25,9 +30,9 @@ class RolesAccessLib {
       
       // track the unique serviceBundles; it's possible the same access is iheritted from multiple sources
       for (const { serviceBundle } of access) {
-        if (this.serviceBundlesToIndexMap[serviceBundle] === undefined) {
-          this.serviceBundlesToIndexMap[serviceBundle] = true // real index is set below after sorting this.serviceBundles.length
-          this.serviceBundles.push(serviceBundle)
+        if (!(serviceBundle in this.serviceBundlesToOrdering)) {
+          this.serviceBundlesToOrdering[serviceBundle] = true // real index is set below after sorting this.serviceBundleNames.length
+          this.serviceBundleNames.push(serviceBundle)
         }
       }
       
@@ -35,9 +40,9 @@ class RolesAccessLib {
     } // for this.accessRules loop
     
     // now, we sort the serviceBundles
-    this.serviceBundles.sort((a,b) => a.toLowerCase().localeCompare(b.toLowerCase()))
-    this.serviceBundles.forEach((d,i) => {
-      this.serviceBundlesToIndexMap[d] = i
+    this.serviceBundleNames.sort((a,b) => a.toLowerCase().localeCompare(b.toLowerCase()))
+    this.serviceBundleNames.forEach((d,i) => {
+      this.serviceBundlesToOrdering[d] = i
     })
     
     if (errors.length > 0) {
@@ -45,67 +50,66 @@ class RolesAccessLib {
     }
   }
   
-  getIndexForDomain(serviceBundle) {
-    return this.serviceBundlesToIndexMap[serviceBundle]
+  getDomainOrdering(serviceBundle) {
+    return this.serviceBundlesToOrdering[serviceBundle]
   }
   
   // TODO: could be static, except then not visible from instance; could append, or just leave.
   accessRulesToSummaries(row, { excludeRoleCount=false, includeSource=false }) {
+    if (row[0].match(/DevOps Engineer, Lead/)) console.log(row) // DEBUG
     return row.map((e, i) => { // each row, which is a collection
+      // 0 is always the role name, so we keep it
       if (i === 0) return e
+      // 1 might be the staff count
       if (i === 1 && excludeRoleCount !== true) return e
+      // and any value that's null just stays
       else if (e === null) {
         return ''
       }
-      else {
-        e.sort((a, b) => { // notice we are caching the rank
-          const aRank = a.rank || accessRank(a)
-          a.rank = aRank
-          const bRank = b.rank || accessRank(b)
-          b.rank = bRank
-          return aRank > bRank ? -1 : aRank < bRank ? 1 : 0
+      else { // we have an array of access rules that we're going to collapse into the effective set.
+        return e.sort(({ type: aType }, { type: bType }) => { // notice we are caching the rank
+          const aRank = rankAccessType(aType)
+          const bRank = rankAccessType(bType)
+          return aRank === bRank ? 0 : aRank > bRank ? 1 : -1
         })
-        
-        let priorRule = null
-        e = e.filter((ar) => {
-          const { rank, type } = ar
-          const priorRank = priorRule?.rank
-          const priorType = priorRule?.type
-          // updates prior rule and returns true if it can pass the gauntlet
-          // always keep the first rule and if the prior rule has a (+) rank and the curr rule (-), it's of a
-          // different kind and we keep
-          if (priorRule !== null && !(priorRank > 0 && rank < 0)) {
-            const priorTypeRank = Math.floor(priorRank / 2) // TODO: why divide by 2?
-            const currTypeRank = Math.floor(rank / 2)
-            if (priorTypeRank >= currTypeRank) return false
-            // otherwise we keep it
+        .filter(({ type }, i, array) => {
+          if (row[0].match(/DevOps Engineer, Lead/)) console.log(`filtering '${type}' (${i})`, array) // DEBUG
+          if (i === array.length - 1) {
+            return true
           }
-          
-          priorRule = ar
-          return true
+          // else, let's see if the current rule is subsumed by the later rule
+          const nextType = array[i + 1].type
+          if (row[0].match(/DevOps Engineer, Lead/)) console.log(`nextType: ${nextType}`) // DEBUG
+          if (type === nextType) {
+            return false // if it's duped, then we can drop it
+          }
+          else if (type === 'reader') {
+            switch (nextType) {
+              case 'reader':
+              case 'editor':
+              case 'admin':
+                return false
+              default:
+                return true
+            }
+          }
+          else if (type === 'editor') {
+            switch (nextType) {
+              case 'editor':
+              case 'admin':
+                return false
+              default:
+                return true
+            }
+          }
         })
-
-        return e.map(({ type, source }) => {
+        .map(({ type, source }) => {
           return `${type}${includeSource ? ` (${source})` : ''}`
         }).join('; ')
       }
-    })
-  }
-}
-
-const accessRank = ({ type }) => {
-  let result = 0
-  switch (type) {
-    case 'reader': result = 2; break
-    case 'editor': result = 4; break
-    case 'manager': result = 6; break
-    case 'admin': result = 8; break
-    case 'access-manager': result = -10; break
-    default: throw new Error(`Found unknown access type '${type}'`)
-  }
-  
-  return result
-}
+    }) // row.map
+  } // accessRulesToSummaries
+} // class RoleAccessLib
 
 const initializeRolesAccess = (org) => {
   if (!org.rolesAccess || !(org.rolesAccess instanceof RolesAccessLib)) {
@@ -113,6 +117,20 @@ const initializeRolesAccess = (org) => {
     org.rolesAccess = new RolesAccessLib(org)
   }
   return org.rolesAccess
+}
+
+const ORDERED_ACCESS_TYPE = [
+  'reader',
+  'editor',
+  'admin',
+  'manager',
+  'access-manager'
+]
+
+const rankAccessType = (type) => {
+  const rank = ORDERED_ACCESS_TYPE.indexOf(type)
+  if (rank === -1) throw new Error(`Unknown access type: ${type}`)
+  return rank
 }
 
 export { initializeRolesAccess }

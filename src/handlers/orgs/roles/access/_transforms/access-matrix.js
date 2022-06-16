@@ -11,8 +11,8 @@ const acceptedFormats = {
 const headerRef = (roleName) => roleName.toLowerCase().replace(/[^\w -]*/g, '').replace(/ /g, '-')
 
 /**
-* A transform generating a "access matrix" report. The X-header is a list of serviceBundles and the Y-header is a list of
-* direct company roles.
+* A transform generating a "access matrix" report. The X-header is a list of serviceBundles and the Y-header is a list
+* of company roles.
 */
 const accessMatrix = ({
   allRoles=false,
@@ -38,10 +38,10 @@ const accessMatrix = ({
   const tableStream = formatTable({ delimiter })
   tableStream.pipe(res)
   
-  const { directRulesByRole, serviceBundles } = rolesAccess
+  const { directRulesByRole, serviceBundleNames } = rolesAccess
   // This row itself is "just" the header and not referenced later, so it's OK if the serviceBundle names differ.
-  const serviceBundleRow = serviceBundles.map(r =>
-    `=HYPERLINK("#gid=${org.innerState.settings.s.security.ACCESS_MATRIX_BUNDLES_SHEET_GID}range=A${serviceBundles.indexOf(r) + 2}","${r}")`)
+  const serviceBundleRow = serviceBundleNames.map(r =>
+    `=HYPERLINK("#gid=${org.innerState.settings.s.security.ACCESS_MATRIX_BUNDLES_SHEET_GID}range=A${serviceBundleNames.indexOf(r) + 2}","${r}")`)
     /* originally did the following, but when imported, it wouldn't recognize the hyperlink even though entering the
        formula works
     `=HYPERLINK("#gid=${org.innerState.settings.s.security.ACCESS_MATRIX_BUNDLES_SHEET_GID}range=A"&(MATCH(LOWER("${r}"),ARRAYFORMULA(LOWER('Service bundles'!A2:A)),0)+1),"${r}")`)
@@ -89,7 +89,7 @@ const accessMatrix = ({
         for (const directAccessRule of directAccessRules) {
           directAccessRule.source = baseRole
           const { serviceBundle } = directAccessRule
-          const index = rolesAccess.getIndexForDomain(serviceBundle) + offset
+          const index = rolesAccess.getDomainOrdering(serviceBundle) + offset
           const currCellEntries = row[index] || []
           currCellEntries.push(directAccessRule)
           row[index] = currCellEntries
@@ -97,8 +97,8 @@ const accessMatrix = ({
       }
     }
     
-    const summary = rolesAccess.accessRulesToSummaries(row, { excludeRoleCount, includeSource })
-    tableStream.write(summary)
+    const summaryRow = rolesAccess.accessRulesToSummaries(row, { excludeRoleCount, includeSource })
+    tableStream.write(summaryRow)
   } // end role iteration
   tableStream.end()
   res.end()
