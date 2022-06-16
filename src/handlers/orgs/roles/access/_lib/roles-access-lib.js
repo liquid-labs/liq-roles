@@ -56,7 +56,6 @@ class RolesAccessLib {
   
   // TODO: could be static, except then not visible from instance; could append, or just leave.
   accessRulesToSummaries(row, { excludeRoleCount=false, includeSource=false }) {
-    if (row[0].match(/DevOps Engineer, Lead/)) console.log(row) // DEBUG
     return row.map((e, i) => { // each row, which is a collection
       // 0 is always the role name, so we keep it
       if (i === 0) return e
@@ -73,13 +72,11 @@ class RolesAccessLib {
           return aRank === bRank ? 0 : aRank > bRank ? 1 : -1
         })
         .filter(({ type }, i, array) => {
-          if (row[0].match(/DevOps Engineer, Lead/)) console.log(`filtering '${type}' (${i})`, array) // DEBUG
           if (i === array.length - 1) {
             return true
           }
           // else, let's see if the current rule is subsumed by the later rule
           const nextType = array[i + 1].type
-          if (row[0].match(/DevOps Engineer, Lead/)) console.log(`nextType: ${nextType}`) // DEBUG
           if (type === nextType) {
             return false // if it's duped, then we can drop it
           }
