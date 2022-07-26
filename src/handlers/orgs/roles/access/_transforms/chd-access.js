@@ -3,21 +3,30 @@ const sections = {
     summary: 'These staff memebrs manage and have access to critical systems within and enabling the CDE.',
     roleSets: [
       {
-        roles: [ 'DevOps Engineer', 'Production Administrator' ],
-        summary: 'Inclusive of Network, Host, and Cloud Services Engineers'
+        roles: [ 'Production Administrator' ],
+        summary: 'Administer production network, host, database, and cloud services.'
       },
-      { roles: [ 'Database Engineer', 'Production Administrator' ] },
       {
-        roles: [ 'MOCA Administrator' ],
-        summary: 'Staff with administrative access to the MOCA administrative portal.'
+        roles: [ 'Access Manager' ],
+        summary: 'Managers production users and access.'
       }
     ]
   },
   'Support and business operations': {
     summary: 'These staff access and process transactions on behalf of the customer or internal business processes.',
     roleSets: [
-      { roles: ['Customer Service Agent'] },
-      { roles: ['Settlement Agent'] }
+      {
+        roles: [ 'MOCA Administrator' ],
+        summary: 'Staff with administrative access to the MOCA administrative portal.'
+      },
+      {
+        roles: ['Customer Service Agent'],
+        summary: 'May access customer transaction data, including full PAN, while addressing customer issues.'
+      },
+      {
+        roles: ['Settlement Agent'],
+        summary: 'Processes raw transaction records from card processors which include full PANs.'
+      }
     ]
   }
 }
@@ -44,7 +53,7 @@ This document details which staff members directly responsible for the proper ha
 
     for (const { summary, roles } of roleSets) {
       report += `### ${roles[0]}s\n${summary ? `__${summary}__\n` : ''}\n`
-      const staff = org.staff.getByRoleName(roles)
+      const staff = org.staff.getByRoleName(roles, { ownRolesOnly: false })
       if (!staff || staff.length === 0) {
         report += '__NONE__\n\n'
       }
