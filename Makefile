@@ -7,7 +7,7 @@ NPM_BIN:=$(shell npm bin)
 CATALYST_SCRIPTS:=$(NPM_BIN)/catalyst-scripts
 
 LIQ_ROLES_SRC:=src/
-LIQ_ROLES_FILES:=$(shell find $(LIQ_ROLES_SRC) -name "*.js" -not -path "*/test/*" -not -name "*.test.js")
+LIQ_ROLES_FILES:=$(shell find $(LIQ_ROLES_SRC) \( -name "*.js" -o -name "*.mjs" \) -not -path "*/test/*" -not -name "*.test.js")
 LIQ_ROLES_TEST_SRC_FILES:=$(shell find $(LIQ_ROLES_SRC) -name "*.js")
 LIQ_ROLES_TEST_BUILT_FILES:=$(patsubst $(LIQ_ROLES_SRC)/%, test-staging/%, $(LIQ_ROLES_TEST_SRC_FILES))
 LIQ_ROLES:=dist/liq-roles.js
