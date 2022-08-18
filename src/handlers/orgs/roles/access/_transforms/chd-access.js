@@ -1,40 +1,42 @@
+const title = 'PCI DSS Roles and Access Report'
 // TODO: swap these settings into the yaml settings
-const sections = {
-  'Technical operations': {
-    summary: 'These staff memebrs manage and have access to critical systems within and enabling the CDE.',
-    roleSets: [
-      {
-        roles: [ 'Production Administrator' ],
-        summary: 'Administer production network, host, database, and cloud services.'
-      },
-      {
-        roles: [ 'Access Manager' ],
-        summary: 'Managers production users and access.'
-      },
-      {
-        roles: [ 'Production Auditor' ],
-        summary: 'Production Auditors have read-only access to all CDE runtime and adjacent component configurations, logs, and meta-data. Note that barring a bug in the logging or similar, the Auditor should not be able access cardholder data (CHD). I.e., the Production Auditor looks at configurations, logs, and other meta-data but does not (in this role) see actual data or content.'
-      }
+const staffSections = [
+  {
+    sectionHeader : 'Full PAN accessors',
+    summary: 'The following staff have access to full 16 digits through some mechanism.',
+    roles: [
+      'Production Administrator',
+      'Production Administrator',
+      'Customer Service Agent',
+      'Settlement Agent',
+      'MOCA Administrator'
     ]
   },
-  'Support and business operations': {
-    summary: 'These staff access and process transactions on behalf of the customer or internal business processes.',
-    roleSets: [
-      {
-        roles: [ 'MOCA Administrator' ],
-        summary: 'Staff with administrative access to the MOCA administrative portal.'
-      },
-      {
-        roles: ['Customer Service Agent'],
-        summary: 'May access customer transaction data, including full PAN, while addressing customer issues.'
-      },
-      {
-        roles: ['Settlement Agent'],
-        summary: 'Processes raw transaction records from card processors which include full PANs.'
-      }
-    ]
+  {
+    summary: 'Technical staff administering production network, host, database, and cloud services.',
+    roles: [ 'Production Administrator' ]
+  },
+  {
+    summary: 'Manage production users and access.',
+    roles: [ 'Access Manager' ]
+  },
+  {
+    summary: 'Production Auditors have read-only access to all CDE runtime and adjacent component configurations, logs, and meta-data. Note that barring a bug in the logging or similar, the Auditor should not be able access cardholder data (CHD). I.e., the Production Auditor looks at configurations, logs, and other meta-data but does not (in this role) see actual data or content.',
+    roles: [ 'Production Auditor' ]
+  },
+  {
+    summary: 'Staff with administrative access to the MOCA administrative portal.',
+    roles: [ 'MOCA Administrator' ]
+  },
+  {
+    summary: 'Support staff who may access customer transaction data, including full PAN, while addressing customer issues.',
+    roles: ['Customer Service Agent']
+  },
+  {
+    summary: 'Accounting staff processing raw transaction records from card processors which include full PANs.',
+    roles: ['Settlement Agent']
   }
-}
+]
 
 // TODO: derive this from updated Technologies Inventory
 const commonCdeChdTech = [
@@ -237,45 +239,45 @@ const chdAccess = ({
   rolesAccess
 }) => {
   // TODO: swap content into template
-  let report = `# PCI DSS Roles and Access Report
+  let report = `# ${title}
 
 ## Purpose and scope
 
 This document details which staff members are directly responsible for the proper handling and security of cardholder data and the cardholder data environment (CDE). This is a generated report derived from the current staff settings as of ${new Date().toISOString()}. This report is considered part of and should be understood in the context of the [Security Framework](./Security%20Framework.md). Understanding who has access to cardholder data is both a requirement for PCI DSS compliance and operationally necessary to ensure proper training, audits, reviews, etc.
 
-### Staff
-`
-  for (const section of Object.keys(sections)) {
-    const { summary, roleSets } = sections[section]
-    report += `### ${section}\n\n${summary}\n\n`
-
-    for (const { summary, roles } of roleSets) {
-      report += `#### ${roles[0]}s\n${summary ? `${summary}\n` : ''}\n`
-      const staff = org.staff.getByRoleName(roles, { ownRolesOnly: false })
-      if (!staff || staff.length === 0) {
-        report += '_NONE_\n\n'
+## Staff
+\n`
+  for (const { roles, sectionHeader, summary } of staffSections) {
+    const header = sectionHeader !== undefined
+      ? sectionHeader
+      : roles.length === 1
+        ? roles[0]
+        : throw new Error(`Found section definition with multple roles and section header defined while generating ${title}`)
+    report += `### ${header}\n\n${summary + summary + '\n\n'}`
+    const staff = org.staff.getByRoleName(roles, { ownRolesOnly: false })
+    if (!staff || staff.length === 0) {
+      report += '_NONE_\n\n'
+    }
+    else {
+      for (const staffMember of staff) {
+        if (staffMember.employmentStatus !== 'logical')
+        report += `- ${staffMember.getFullName()} <${staffMember.email}>\n`
       }
-      else {
-        for (const staffMember of staff) {
-          if (staffMember.employmentStatus !== 'logical')
-          report += `- ${staffMember.getFullName()} <${staffMember.email}>\n`
-        }
-        report += '\n'
-      }
+      report += '\n'
     }
   }
   
   report += `
-### Third-party vendors and partners
+## Third-party vendors and partners
 
-#### CDE connected and runtime vendors
+### CDE connected and runtime vendors
 
 The following vendors are connected to, polled by, or integrated into the cardholder data environment (CDE).
 `
   report += generateVendorContent(cdeConnectedTech)
   
   report += `\n
-#### Third-parties with CHD Access
+### Third-parties with CHD Access
 `
   report += generateVendorContent(chdSharedTech)
   report += '\n'
