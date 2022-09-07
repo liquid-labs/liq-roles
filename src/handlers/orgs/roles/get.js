@@ -6,7 +6,7 @@ import { toKebabCase } from 'js-convert-case'
 import { formatOutput, getOrgFromKey } from '@liquid-labs/liq-handlers-lib'
 
 const method = 'get'
-const path = new RegExp('/orgs/([^/#?]+)/roles/((?!list|org-chart)[^/#?]+)')
+const path = new RegExp('/orgs/([^/#?]+)/roles/((?!list|org-chart(?:-data)?)[^/#?]+)')
 const parameters = []
 
 const func = ({ model }) => (req, res) => {

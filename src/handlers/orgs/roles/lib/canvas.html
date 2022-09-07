@@ -1,0 +1,24 @@
+<html><head><title>Test page</title></head>
+<!-- script src="https://d3js.org/d3.v7.min.js"></script -->
+<script src="./d3.v7.js"></script>
+<script src="./d3-org-chart.js"></script>
+<script src="./d3-flextree.js"></script>
+<body>
+<div id="main"></div>
+<div style="visibility: hidden" id="status"></div>
+<script>
+const orgKey = document.location.search.substring(1);
+
+// d3.csv('./test.csv')
+d3.json('./data')
+  .then(data => {
+    /* chart = */
+    new d3.OrgChart()
+      .container('#main')
+      .data(data)
+      .render();
+      
+    d3.select('#status').attr('id', 'ready')
+});
+</script>
+</body></html>
