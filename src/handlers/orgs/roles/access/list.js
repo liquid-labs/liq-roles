@@ -19,7 +19,7 @@ parameters.push({
 
 const func = ({ model, reporter }) => (req, res) => {
   const org = getOrgFromKey({ model, params: req.params, res })
-  if (org === false) {
+  if (org === false) { // TODO: check; I think 'getOrgFromKey' handles the error msg
     return
   }
   
