@@ -6,7 +6,7 @@ const method = 'get'
 const path = '/orgs/:orgKey/roles/org-chart'
 const parameters = [
   {
-    name: "showWork",
+    name: "interactive",
     description: "Launches a regular (non-headless) browser."
   }
 ]
@@ -17,7 +17,7 @@ const func = ({ model }) => async (req, res) => {
   const { orgKey } = req.params
   // const org = getOrgFromKey({ model, orgKey, params: req.params, res })
   
-  const { showWork = false } = req.query
+  const { interactive = false } = req.query
   
   // yes, we repeat org key, but it makes it easy to retrieve from the HTML page.
   const pageUrl = `http://127.0.0.1:32600/orgs/${orgKey}/roles/org-chart/page?${orgKey}`
@@ -28,7 +28,7 @@ const func = ({ model }) => async (req, res) => {
       headless: true
     }
     
-    if (showWork === true || showWork === 'true') {
+    if (interactive === true || interactive === 'true') {
       options.headless = false
     }
     browser = await puppeteer.launch(options)
@@ -41,7 +41,6 @@ const func = ({ model }) => async (req, res) => {
     .on('requestfailed', request =>
       console.log(`request to resource '${pageUrl}' failed`))
   
-  console.error(`requesting ${pageUrl}`) // DEBUG
   await page.goto(pageUrl, { waitUntil: 'networkidle0' })
   
   try {
@@ -58,7 +57,7 @@ const func = ({ model }) => async (req, res) => {
   
   res.send(await page.content())
   
-  await browser.close()
+  if (!interactive) browser.close()
 }
 
 export { func, method, parameters, path }
