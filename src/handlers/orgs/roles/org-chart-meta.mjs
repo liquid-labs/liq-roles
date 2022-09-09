@@ -2,6 +2,8 @@ import * as fs from 'node:fs/promises'
 import { dirname } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
+import { getOrgFromKey } from '@liquid-labs/liq-handlers-lib'
+
 const method = 'get'
 const path = '/orgs/:orgKey/roles/org-chart/:resource'
 const parameters = [
@@ -38,21 +40,46 @@ const func = ({ model }) => async (req, res) => {
       .send(contents)
   }
   else if (resource === 'data') { // the company org chart model
+    const org = getOrgFromKey({ model, params: req.params, res })
+    if (org === false) { // I think 'getOrgFromKey' generates the error
+      return
+    }
+    const staff = org.staff.list()
     const data = []
-    data.push({
-      name: "Ian",
-      id: "ian@mocapay.com",
-      location: "Bastrop",
-      positionName: "CEO",
-      parentId: null
-    },
-    {
-      name: "Sarah",
-      id: "sarah@mocapay.com",
-      location: "India",
-      positionName: "CTO",
-      parentId: "ian@mocapay.com"
-    })
+    for (const staffMember of staff) {
+      for (const role of staffMember.getOwnRoles()) {
+        if (role.designated) continue
+        const roleName = role.name
+        if (roleName === 'Staff' || roleName === 'Contractor' || roleName === 'Employee') continue
+        
+        const datum = {
+          id : staffMember.email + '/' + role.name,
+          email: staffMember.email,
+          name: `${staffMember.givenName} ${staffMember.familyName} <${staffMember.email}>`,
+          title: role.name
+        }
+        if (role.managerEmail) {
+          datum.parentId = role.managerEmail + '/' + role.managerRole
+        }
+        
+        data.push(datum)
+      }
+    }
+    /*
+    for (const staffMember of staff) {
+      for (const roles of staffMember.getOwnRoles())
+        const sibblingsRoleNamesToMerge =
+          role.implies && role.implies.filter((impliedRole) =>
+            impliedRle.display !== false
+              && impliedRole.mngrProtocol
+          )
+        
+          role.implies && role.implies.filter(impSpec =>
+            impSpec.display !== false
+            && impSpec.mngrProtocol === 'same'
+              && node.ids.indexOf(`${node.email}/${impSpec.mergeWith}`) >= 0)
+            .map(i => i.name)
+    }*/
     
     res.type('application/json')
       .send(data)
