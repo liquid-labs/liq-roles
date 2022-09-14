@@ -36,6 +36,7 @@
   "dependencies": {
     "@fast-csv/format": "^4.3.5",
     "@liquid-labs/liq-handlers-lib": "^1.0.0-alpha.4",
+    "@liquid-labs/liq-roles-lib": "file:.yalc/@liquid-labs/liq-roles-lib",
     "js-convert-case": "^4.2.0",
     "puppeteer": "^17.1.1"
   }
