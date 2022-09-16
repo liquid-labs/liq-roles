@@ -4,8 +4,8 @@
 import { getOrgFromKey } from '@liquid-labs/liq-handlers-lib'
 import { getDocumentsByRoles, getPoliciesIndexByRole } from '@liquid-labs/liq-roles-lib'
 
-const method = 'post'
-const path = '/orgs/:orgKey/roles/policies/reviews-by-roles'
+const method = 'get'
+const path = '/orgs/:orgKey/roles/:scope/policies(/list)?'
 const parameters = [
   {
     name: 'decompose',
@@ -44,17 +44,24 @@ const func = ({ app, model }) => (req, res) => {
     return
   }
   
-  const { decompose, directPoliciesOnly, includeImpliedRoles, staffedOnly } = req.body || {}
+  const { scope } = req.params
+  const { decompose, directPoliciesOnly, includeImpliedRoles, staffedOnly } = req.query || {}
   
   const rolePoliciesIndex = getPoliciesIndexByRole({ org, res })
   if (rolePoliciesIndex === false) return // error response handled by lib function
   
-  const staffListOptions = { rawData: true}
-  // TODO: I don't think the string test is necessary anymore
+  const rolesListOptions = { rawData: true }
+  // TODO: fix param normalization and simplify this
   if (includeImpliedRoles === true || includeImpliedRoles === 'true') {
-    staffListOptions.includeIndirect = true
+    rolesListOptions.includeIndirect = true
   }
-  const roleNames = org.roles.list(staffListOptions).map((r) => r.name)
+  let roleNames
+  if (scope === 'all') {
+    roleNames = org.roles.list(rolesListOptions).map((r) => r.name)
+  }
+  else {
+    roleNames = [ scope ]
+  }
     
   const policyDocsByRole = {}
   const getStaffOpts = includeImpliedRoles

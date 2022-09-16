@@ -1,6 +1,6 @@
-import * as policiesByReview from './policies-by-role'
+import * as listPoliciesByRole from './list'
 
-const handlers = [ policiesByReview ]
+const handlers = [ listPoliciesByRole ]
 
 export {
   handlers
