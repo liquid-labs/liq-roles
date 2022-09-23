@@ -7,11 +7,16 @@ const setup = ({ model, reporter }) => {
       org.policies._make = []
     }
     
-    const buildTargets = [ '$(OUT_DIR)/security/PCI\\ DSS\\ Roles\\ and\\ Access\\ Report.md' ]
+    const buildTargets = [
+      '$(OUT_DIR)/security/reports/PCI\\ DSS\\ Roles\\ and\\ Access\\ Report.md'
+    ]
     
     org.policies._make.push({
       buildTargets,
-      rulesDecls : () => `${buildTargets[0]}:\n\tliq orgs ${orgKey} roles access list -- transform=chdAccess > "$@"`
+      rulesDecls : () => `${buildTargets[0]}:
+\tmkdir -p $(dir $@)
+\tliq orgs ${orgKey} roles access list -- transform=chdAccess > "$@"
+`
     })
   }
 }
