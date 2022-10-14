@@ -15,6 +15,11 @@ parameters.push({
   required: false,
   isBoolean: true,
   description: "If true, then will indicate the role directly granting access, where applicable."
+},
+{
+  name: 'transform',
+  required: false,
+  description: "The name of the transform to apply to the list."
 })
 
 const func = ({ model, reporter }) => (req, res) => {
@@ -75,4 +80,4 @@ const applyTransform = ({ res, transformName, ...transformOptions }) => {
   transform({ res, ...transformOptions })
 }
 
-export { func, path, method }
+export { func, parameters, path, method }
