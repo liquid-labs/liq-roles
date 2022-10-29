@@ -250,9 +250,11 @@ const chdAccess = ({
   rolesAccess
 }) => {
   // TODO: swap content into template
+  const lastUpdated = org.lastModified
+  const lastUpdateString = new Date(Math.round(lastUpdated)).toISOString()
   let report = `# ${title}
 
-*This is a generated report derived from the current staff settings as of ${new Date().toISOString()}.*
+*This is a generated report derived from the current organization data last modified ${lastUpdateString}.*
 
 ## Purpose and scope
 
