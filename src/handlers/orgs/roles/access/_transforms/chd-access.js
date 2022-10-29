@@ -1,28 +1,22 @@
 const title = 'PCI DSS Roles and Access Report'
 // TODO: swap these settings into the yaml settings
+
+const panAccessRoles = [
+  'Production Administrator',
+  'MOCA Administrator',
+  'Customer Service Agent',
+  'Settlement Agent'
+]
+
 const staffSections = [
   {
     sectionHeader : 'Full PAN accessors',
-    summary: 'The following staff have access to full 16 digits through some mechanism.',
-    roles: [
-      'Production Administrator',
-      'Production Administrator',
-      'Customer Service Agent',
-      'Settlement Agent',
-      'MOCA Administrator'
-    ]
+    summary: 'The following staff have access to full 16 digits through one or more roles.',
+    roles: panAccessRoles
   },
   {
     summary: 'Technical staff administering production network, host, database, and cloud services.',
     roles: [ 'Production Administrator' ]
-  },
-  {
-    summary: 'Manage production users and access.',
-    roles: [ 'Access Manager' ]
-  },
-  {
-    summary: 'Production Auditors have read-only access to all CDE runtime and adjacent component configurations, logs, and meta-data. Note that barring a bug in the logging or similar, the Auditor should not be able access cardholder data (CHD). I.e., the Production Auditor looks at configurations, logs, and other meta-data but does not (in this role) see actual data or content.',
-    roles: [ 'Production Auditor' ]
   },
   {
     summary: 'Staff with administrative access to the MOCA administrative portal.',
@@ -35,6 +29,14 @@ const staffSections = [
   {
     summary: 'Accounting staff processing raw transaction records from card processors which include full PANs.',
     roles: ['Settlement Agent']
+  },
+  {
+    summary: 'Manage production users and access.',
+    roles: [ 'Access Manager' ]
+  },
+  {
+    summary: 'Production Auditors have read-only access to all CDE runtime and adjacent component configurations, logs, and meta-data. Note that barring a bug in the logging or similar, the Auditor should not be able access cardholder data (CHD). I.e., the Production Auditor looks at configurations, logs, and other meta-data but does not (in this role) see actual data or content.',
+    roles: [ 'Production Auditor' ]
   }
 ]
 
@@ -229,6 +231,15 @@ const generateVendorContent = (techData) => {
   return results
 }
 
+const staffSectionTocEntry = ({ sectionHeader, roles }) => {
+  if (!sectionHeader && roles.length > 1) {
+    throw new Error(`Found section definition with multple roles and no section header; section roles: ('${secTitle.join("', '")}').`)
+  }
+  
+  const secTitle = sectionHeader || roles[0]
+  return `[${secTitle}](#${secTitle.toLowerCase().replaceAll(/[^a-z0-9]/g, '-')})`
+}
+
 const chdAccess = ({
   allRoles=false,
   excludeRoleCount=false,
@@ -241,19 +252,26 @@ const chdAccess = ({
   // TODO: swap content into template
   let report = `# ${title}
 
+*This is a generated report derived from the current staff settings as of ${new Date().toISOString()}.*
+
 ## Purpose and scope
 
-This document details which staff members are directly responsible for the proper handling and security of cardholder data and the cardholder data environment (CDE). This is a generated report derived from the current staff settings as of ${new Date().toISOString()}. This report is considered part of and should be understood in the context of the [Security Framework](./Security%20Framework.md). Understanding who has access to cardholder data is both a requirement for PCI DSS compliance and operationally necessary to ensure proper training, audits, reviews, etc.
+This document details which staff members are directly responsible for the proper handling and security of cardholder data and the cardholder data environment (CDE). This report is considered part of and should be understood in the context of the [Security Framework](./Security%20Framework.md). Understanding who has access to cardholder data is both a requirement for PCI DSS compliance and operationally necessary to ensure proper training, audits, reviews, etc.
 
-## Staff
+## Report contents
+
+- [Staff with CHD involvement](#staff-with-chd-involvement)
+  - ${staffSections.map(staffSectionTocEntry).join('\n  - ')}
+- [Third-parties with CHD involvement](#third-parties-with-chd-involvement)
+  - [Third-parties with CHD Access](#third-parties-with-chd-access)
+  - [CDE connected and runtime vendors](#cde-connected-and-runtime-vendors)
+
+## Staff with CHD involvement
 \n`
   for (const { roles, sectionHeader, summary } of staffSections) {
-    const header = sectionHeader !== undefined
-      ? sectionHeader
-      : roles.length === 1
-        ? roles[0]
-        : throw new Error(`Found section definition with multple roles and section header defined while generating ${title}`)
+    const header = sectionHeader || roles[0] // the singularity of roles is validated while generating the TOC
     report += `### ${header}\n\n${summary + '\n\n'}`
+    
     const staff = org.staff.getByRoleName(roles, { ownRolesOnly: false })
     if (!staff || staff.length === 0) {
       report += '_NONE_\n\n'
@@ -268,34 +286,20 @@ This document details which staff members are directly responsible for the prope
   }
   
   report += `
-## Third-party vendors and partners
+## Third-parties with CHD involvement
 
+### Third-parties with CHD Access
+`
+  report += generateVendorContent(chdSharedTech)
+  report += `\n
 ### CDE connected and runtime vendors
 
 The following vendors are connected to, polled by, or integrated into the cardholder data environment (CDE).
 `
   report += generateVendorContent(cdeConnectedTech)
-  
-  report += `\n
-### Third-parties with CHD Access
-`
-  report += generateVendorContent(chdSharedTech)
-  report += '\n'
-  
-  res.type(`text/markdown`).send(report)
-  /*
-List of users who have access to Card holder data environment
-And sub-lists
-- List of network administrators (by Network Engineer, Senior + Production Administrator)
-- List of server administrators (by Host Engineer, Senior + Production Administrator)
-- List of database administrators (by Database Engineer, Senior + Production Administrator)
-- List of cloud administrators (by Cloud Engineer, Senior + Production Administrator)
-- List of application support team (by Customer Support Agent)
-- Deploy Managers
+  report += `\n`
 
-- List of application administrators (by Application Admin) <- from Vendors
-- List of operation team have access to CDE (by Production Ops <- implied by Visa Support Administrator) <- from Vendors
-*/
+  res.type(`text/markdown`).send(report)
 }
 
 export {
