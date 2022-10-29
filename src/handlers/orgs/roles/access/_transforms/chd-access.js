@@ -253,7 +253,7 @@ This document details which staff members are directly responsible for the prope
       : roles.length === 1
         ? roles[0]
         : throw new Error(`Found section definition with multple roles and section header defined while generating ${title}`)
-    report += `### ${header}\n\n${summary + summary + '\n\n'}`
+    report += `### ${header}\n\n${summary + '\n\n'}`
     const staff = org.staff.getByRoleName(roles, { ownRolesOnly: false })
     if (!staff || staff.length === 0) {
       report += '_NONE_\n\n'
