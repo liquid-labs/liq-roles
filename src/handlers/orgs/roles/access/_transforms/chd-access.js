@@ -19,6 +19,14 @@ const staffSections = [
     roles: [ 'Production Administrator' ]
   },
   {
+    summary: 'Manage production users and access.',
+    roles: [ 'Access Manager' ]
+  },
+  {
+    summary: 'Production Auditors have read-only access to all CDE runtime and adjacent component configurations, logs, and meta-data. Note that barring a bug in the logging or similar, the Auditor should not be able access cardholder data (CHD). I.e., the Production Auditor looks at configurations, logs, and other meta-data but does not (in this role) see actual data or content.',
+    roles: [ 'Production Auditor' ]
+  },
+  {
     summary: 'Staff with administrative access to the MOCA administrative portal.',
     roles: [ 'MOCA Administrator' ]
   },
@@ -29,14 +37,6 @@ const staffSections = [
   {
     summary: 'Accounting staff processing raw transaction records from card processors which include full PANs.',
     roles: ['Settlement Agent']
-  },
-  {
-    summary: 'Manage production users and access.',
-    roles: [ 'Access Manager' ]
-  },
-  {
-    summary: 'Production Auditors have read-only access to all CDE runtime and adjacent component configurations, logs, and meta-data. Note that barring a bug in the logging or similar, the Auditor should not be able access cardholder data (CHD). I.e., the Production Auditor looks at configurations, logs, and other meta-data but does not (in this role) see actual data or content.',
-    roles: [ 'Production Auditor' ]
   }
 ]
 
@@ -265,8 +265,8 @@ This document details which staff members are directly responsible for the prope
 - [Staff with CHD involvement](#staff-with-chd-involvement)
   - ${staffSections.map(staffSectionTocEntry).join('\n  - ')}
 - [Third-parties with CHD involvement](#third-parties-with-chd-involvement)
-  - [Third-parties with CHD Access](#third-parties-with-chd-access)
-  - [CDE connected and runtime vendors](#cde-connected-and-runtime-vendors)
+  - [Third-parties with CHD access](#third-parties-with-chd-access)
+  - [CDE connected third-parties](#cde-connected-third-parties)
 
 ## Staff with CHD involvement
 \n`
@@ -290,11 +290,11 @@ This document details which staff members are directly responsible for the prope
   report += `
 ## Third-parties with CHD involvement
 
-### Third-parties with CHD Access
+### Third-parties with CHD access
 `
   report += generateVendorContent(chdSharedTech)
   report += `\n
-### CDE connected and runtime vendors
+### CDE connected third-parties
 
 The following vendors are connected to, polled by, or integrated into the cardholder data environment (CDE).
 `
