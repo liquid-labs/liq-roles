@@ -1,12 +1,56 @@
-<html><head><title>Test page</title></head>
+<html>
+<head>
+  <title>Test page</title>
+  <style type="text/css">
+    html, body {
+      margin: 0;
+      min-height: 100%
+    }
+  </style>
+</head>
 <!-- script src="https://d3js.org/d3.v7.min.js"></script -->
 <script src="./d3.v7.js"></script>
 <script src="./d3-org-chart.js"></script>
 <script src="./d3-flextree.js"></script>
+<script src="./jspdf.umd.min.js"></script>
 <body>
 <div id="main"></div>
-<div style="visibility: hidden" id="status"></div>
+<div style="visibility: hidden" id="status">
+</div>
+<button onclick="downloadPng({full:true})" style="position: absolute; top:0; right:0; height: 20">export img</button>
+<button onclick="chart.exportSvg()" style="position: absolute; top:20; right:0">export svg</button>
 <script>
+downloadPng() {
+  d3ToPng('selector', 'name');
+}
+/*function downloadPdf(options) {
+  chart.exportImg(Object.assign(
+    {},
+    options,
+    {
+      save: true,
+      onLoad: (base64) => {
+        console.log('exportImg onload')
+        var pdf = new jspdf.jsPDF();
+        var img = new Image();
+        img.src = base64;
+        img.onload = function () {
+          console.log('img onload')
+          pdf.addImage(
+            img,
+            'JPEG',
+            5,
+            5,
+            595 / 3,
+            ((img.height / img.width) * 595) / 3
+          );
+          pdf.save('chart.pdf');
+        };
+      }
+    }
+  ))
+}*/
+
 const orgKey = document.location.search.substring(1);
 
 // d3.csv('./test.csv')
@@ -60,6 +104,52 @@ d3.json('./data')
       .render();
     
     chart.expandAll();
+    // chart.exportImg({full:true})
+    /*
+    // zoom to fit
+    const root = d3.select('#main svg');
+    var bounds = root.node().getBBox();
+    console.log('bounds:', bounds.x, bounds.y);
+    console.log(bounds);
+    var parent = root.node().parentElement;
+    var fullWidth  = parent.clientWidth  || parent.parentNode.clientWidth,
+       fullHeight = parent.clientHeight || parent.parentNode.clientHeight;
+    var width  = bounds.width,
+       height = bounds.height;
+    var midX = bounds.x + width / 2,
+       midY = bounds.y + height / 2;
+    // if (width == 0 || height == 0) return; // nothing to fit
+    var scale = 0.85 / Math.max(width / fullWidth, height / fullHeight);
+    var translate = [
+       fullWidth  / 2 - scale * midX,
+       fullHeight / 2 - scale * midY
+    ];
+
+    console.log("zoomFit", translate, scale);
+
+    /*var zoom = d3.zoomIdentity
+      .translate(translate[0], translate[1])
+      .scale(scale);* /
+
+    // console.log(zoom.transform);
+
+    function handleZoom(e) {
+      d3.select('#main svg g')
+		    .attr('transform', e.transform);
+    }
+
+    const zoom = d3.zoom().on('zoom', handleZoom);
+    //root.call(zoom.translateBy, translate[0], translate[1]);
+    //root.call(zoom.scaleBy, scale);
+    root.call(zoom.translateTo, translate[0], translate[1]);
+    root.call(zoom.scaleBy, 1.7);
+    console.log('done!');
+      // .transition()
+      // .duration(0) // milliseconds
+      
+      // .call(transform, transform);
+    // end zoom to fit
+    */
     
     d3.select('#status').attr('id', 'ready')
 });

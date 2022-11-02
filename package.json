@@ -31,13 +31,18 @@
   },
   "devDependencies": {
     "@liquid-labs/catalyst-scripts": "^1.0.0-alpha.53",
+    "d3": "^7.6.1",
     "d3-org-chart": "^2.6.0"
   },
   "dependencies": {
     "@fast-csv/format": "^4.3.5",
     "@liquid-labs/liq-handlers-lib": "^1.0.0-alpha.7",
     "@liquid-labs/liq-roles-lib": "^1.0.0-alpha.2",
+    "canvas": "^2.10.2",
+    "d3-node": "^3.0.0",
+    "d3-svg-to-png": "^0.2.0",
     "js-convert-case": "^4.2.0",
+    "jsdom": "^20.0.2",
     "puppeteer": "^17.1.1"
   }
 }
