@@ -1,3 +1,10 @@
+/**
+* #### Developer notes
+*
+* Attempted to implement a regular server side implementation without the embedded browser nonesense. The examples of
+* using d3 on node are thin and it's not clear that d3-org-chart *can* work server side in the first place. After 6+
+* hours, hit a problem with a null 'baseVal' on the SVGElement with no clear workaround.
+*/
 import * as fs from 'fs/promises'
 
 // import * as d3 from 'd3'
