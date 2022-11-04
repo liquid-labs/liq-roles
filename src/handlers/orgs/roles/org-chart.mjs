@@ -29,7 +29,7 @@ const func = ({ model }) => async (req, res) => {
   const { interactive = false } = req.query
   
   // yes, we repeat org key, but it makes it easy to retrieve from the HTML page.
-  const pageUrl = `http://127.0.0.1:32600/orgs/${orgKey}/roles/org-chart/page?${orgKey}`
+  const pageUrl = `http://127.0.0.1:32600/orgs/${orgKey}/roles/org-chart/page`
   
   if (browser === undefined) {
     const options = {
@@ -64,7 +64,7 @@ const func = ({ model }) => async (req, res) => {
   
   fs.writeFile('testytest.pdf', pdfBits)
   
-  res.send(await page.content())
+  res.send('hmm...')//await page.content())
   
   if (!interactive) browser.close()
 }

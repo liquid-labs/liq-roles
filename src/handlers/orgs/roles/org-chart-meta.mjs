@@ -17,9 +17,8 @@ const myDir = dirname(fileURLToPath(import.meta.url))
 
 // resources referenced by the page
 const resourceMap = {
-  'd3.v7.js': myDir + '/d3.v7.js',
-  'd3-flextree.js':  myDir + '/d3-flextree.js',
-  'd3-org-chart.js': myDir + '/../node_modules/d3-org-chart/build/d3-org-chart.js'
+  'd3-org-chart.js': myDir + '/../node_modules/d3-org-chart/build/d3-org-chart.js',
+  'd3-svg-to-png.js': myDir + '/../node_modules/d3-svg-to-png/index.js'
 }
 
 const func = ({ model }) => async (req, res) => {
@@ -30,13 +29,6 @@ const func = ({ model }) => async (req, res) => {
     
     const contents = await fs.readFile(pagePath)
     res.type('text/html')
-      .send(contents)
-  }
-  else if (resourceMap[resource]) { // javascript resources loaded on the page
-    // Note all required resource are JS files
-    const scriptPath = resourceMap[resource]
-    const contents = await fs.readFile(scriptPath)
-    res.type('text/javascript')
       .send(contents)
   }
   else if (resource === 'data') { // the company org chart model
@@ -84,8 +76,29 @@ const func = ({ model }) => async (req, res) => {
     res.type('application/json')
       .send(data)
   }
+  else if (resourceMap[resource]) { // javascript resources loaded on the page
+    const scriptPath = resourceMap[resource]
+    const contents = await fs.readFile(scriptPath)
+    // Note all required resource are JS files
+    res.type('text/javascript')
+      .send(contents)
+  }
   else {
-    res.status(400).json({ message: `Unknown meta data request resource '${resource}'.` })
+    const testFile = myDir + '/' + resource
+    console.log('testFile:', testFile)
+    try {
+      await fs.access(testFile) // raises exception if no file or can't otherwise access
+      const contents = await fs.readFile(testFile)
+      const type = testFile.endsWith('.map')
+        ? 'application/json'
+        : 'text/javascript'
+      res.type(type)
+        .send(contents)
+    }
+    catch (e) {
+      console.error(e)
+      res.status(400).json({ message: `Unknown meta data request resource '${resource}'.` })
+    }
   }
 }
 

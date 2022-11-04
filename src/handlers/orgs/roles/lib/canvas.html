@@ -1,15 +1,33 @@
-<html><head><title>Test page</title></head>
+<html>
+<head>
+  <title>Test page</title>
+  <style type="text/css">
+    html, body {
+      margin: 0;
+      min-height: 100%
+    }
+  </style>
+</head>
 <!-- script src="https://d3js.org/d3.v7.min.js"></script -->
 <script src="./d3.v7.js"></script>
 <script src="./d3-org-chart.js"></script>
 <script src="./d3-flextree.js"></script>
 <body>
 <div id="main"></div>
-<div style="visibility: hidden" id="status"></div>
-<script>
-const orgKey = document.location.search.substring(1);
+<div style="visibility: hidden" id="status">
+</div>
 
-// d3.csv('./test.csv')
+<canvas id="canvas" width="800" height="400" style=""></canvas>
+<div id="png-container"></div>
+<div id="code-container"></div>
+
+<script>
+const htmlEscape = (s) => s.replace(/&/g, "&amp;")
+         .replace(/</g, "&lt;")
+         .replace(/>/g, "&gt;")
+         .replace(/"/g, "&quot;")
+         .replace(/'/g, "&#39;")
+
 d3.json('./data')
   .then(data => {
     /* chart = */
@@ -18,50 +36,88 @@ d3.json('./data')
       .data(data)
       .nodeWidth((d) => 250)
       .initialZoom(0.7)
-      .nodeHeight((d) => 175)
+      .nodeHeight((d) => 140)
       .childrenMargin((d) => 40)
       .compactMarginBetween((d) => 15)
       .compactMarginPair((d) => 80)
       .nodeContent(function (d, i, arr, state) {
-        return `<div style="padding-top:30px;background-color:none;margin-left:1px;height:${
-  d.height
-}px;border-radius:2px;overflow:visible">
+        // TODO: why is the email included with the name?
+        const name = htmlEscape(d.data.name.replace(/\s*<[^>]*>\s*/, ''))
+        const [ email ] = d.data.id.split('/').map(htmlEscape)
+        return `
   <div style="height:${
-    d.height - 32
-  }px;padding-top:0px;background-color:white;border:1px solid lightgray;">
-`+/*
-    <img src=" ${
-      d.data.imageUrl
-    }" style="margin-top:-30px;margin-left:${d.width / 2 - 30}px;border-radius:100px;width:60px;height:60px;" />
-*/`
-   <div style="margin-right:10px;margin-top:15px;float:right">${
-     d.data.id
-   }</div>
-   
-   <div style="margin-top:-30px;background-color:#3AB6E3;height:10px;width:${
-     d.width - 2
-   }px;border-radius:1px"></div>
-
-   <div style="padding:20px; padding-top:35px;text-align:center">
-       <div style="color:#111672;font-size:16px;font-weight:bold">
-         ${d.data.name} <${d.data.email}>
-       </div>
-       <div style="color:#404040;font-size:16px;margin-top:4px">
-         ${d.data.title}
-       </div>
-   </div>
-   <div style="display:flex;justify-content:space-between;padding-left:15px;padding-right:15px;">
-     <div > Manages:  ${d.data._directSubordinates} 👤</div>
-     <div > Oversees: ${d.data._totalSubordinates} 👤</div>
-   </div>
-  </div>
-</div>`;
-                })
+    d.height
+  }px;padding-top:0px;background-color:white;border:1px solid lightgray;border-radius:2px">
+    <div style="padding:20px; padding-top:15px;text-align:center">
+      <div style="color:#111672;font-size:16px;font-weight:bold">
+        ${name}
+      </div>
+      <div style="color:#888888;font-size:12px;margin-top:4px">
+        ${email}
+      </div>
+      <div style="color:#404040;font-size:16px;margin-top:4px">
+        ${htmlEscape(d.data.title)}
+      </div>
+    </div>
+    <div style="display:flex;justify-content:space-between;position:absolute;bottom:5px;min-width:80%;left:10%">
+      <div> Manages:  ${d.data._directSubordinates} </div>
+      <div> Oversees: ${d.data._totalSubordinates} </div>
+    </div>
+  </div>`
+})
       .render();
     
     chart.expandAll();
+    chart.fit();
     
-    d3.select('#status').attr('id', 'ready')
+    // copies the SVG into the canvas element, where it can be saved from.
+    const canvasLoader = function() {
+       // grab the final image code
+      const svg = document.querySelector('svg')
+      const svgHeight = parseInt(svg.getAttribute('height'), 10)
+      const svgWidth = parseInt(svg.getAttribute('width'), 10)
+      // determine the placement and scale
+      const g = document.querySelector('svg g')
+      const svgTransform = g.getAttribute('transform')
+      const tformMatch = svgTransform.match(/translate\(([0-9.]+),([0-9.]+)\)\s*scale\(([0-9.]+)\)/)
+      const svgX = parseFloat(tformMatch[1])
+      const svgY = parseFloat(tformMatch[2])
+      const svgScale = parseFloat(tformMatch[3])
+      // reverse the scaling so we get decent resolution when we export the image
+      const rescale = 1/svgScale
+      const reheight = svgHeight * rescale
+      const rewidth = svgWidth * rescale
+      const reX = svgX * rescale
+      const reY = svgY * rescale
+      // set up the canvas
+      var canvas = document.getElementById("canvas");
+      svg.setAttribute('height', reheight)
+      svg.setAttribute('width', rewidth)
+      canvas.height = reheight
+      canvas.width = rewidth
+      g.setAttribute('transform', `translate(${reX},${reY}) scale(1)`)
+      // draw the image on the canvas
+      var svgString = new XMLSerializer().serializeToString(document.querySelector('svg'));
+      var ctx = canvas.getContext("2d");
+      var DOMURL = self.URL || self.webkitURL || self;
+      var img = new Image();
+      var blob = new Blob([svgString], {type: "image/svg+xml;charset=utf-8"});
+      var url = DOMURL.createObjectURL(blob);
+      img.onload = function() {
+          ctx.drawImage(img, 0, 0);
+          /* if we also wanted to generate a standalone PNG, we'd do this:
+          var png = canvas.toDataURL("image/png;base64");
+          document.querySelector('#png-container').innerHTML = '<img src="'+png+'"/>';
+          DOMURL.revokeObjectURL(png);*/
+      };
+      img.src = url;
+      window.scrollTo(rewidth / 2, reheight * 3/2)
+      // signal that everything is done
+      d3.select('#status').attr('id', 'ready')
+    }
+    
+    // give the chart a moment to settle
+    setTimeout(canvasLoader, 1500)
 });
 </script>
 </body></html>
