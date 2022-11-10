@@ -22,6 +22,7 @@ parameters.push({
   description: "The name of the transform to apply to the list."
 })
 
+// break out the 'transform' function as separate 'report' handler
 const func = ({ model, reporter }) => (req, res) => {
   const org = getOrgFromKey({ model, params: req.params, res })
   if (org === false) { // TODO: check; I think 'getOrgFromKey' handles the error msg
