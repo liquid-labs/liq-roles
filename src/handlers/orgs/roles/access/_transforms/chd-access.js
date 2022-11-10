@@ -4,8 +4,7 @@ const title = 'PCI DSS Roles and Access Report'
 const panAccessRoles = [
   'Production Administrator',
   'MOCA Administrator',
-  'Customer Service Agent',
-  'Settlement Agent'
+  'Customer Service Agent'
 ]
 
 const staffSections = [
@@ -33,10 +32,6 @@ const staffSections = [
   {
     summary: 'Support staff who may access customer transaction data, including full PAN, while addressing customer issues.',
     roles: ['Customer Service Agent']
-  },
-  {
-    summary: 'Accounting staff processing raw transaction records from card processors which include full PANs.',
-    roles: ['Settlement Agent']
   }
 ]
 
