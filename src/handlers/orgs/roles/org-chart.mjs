@@ -24,9 +24,49 @@ const parameters = [
   }
 ]
 
-let browserWSEndpoint = undefined
+// TODO: the current logic which attempts to cache the browser for future use does not work. We tried with 'browser' also declared here in case the problem was it going out of scope, but that didn't help (or if it did, there are other problems).
+/**
+* The websocket endpoint for the created browser.
+*/
+// let browserWSEndpoint = undefined
+const browserOptions = {
+  args: [ '--allow-file-access-from-files' ],
+  headless: true
+}
 
-const func = ({ model }) => async (req, res) => {
+const browserKey = 'liq-roles:browser'
+
+const getBrowser = async ({ cache, interactive }) => {
+  let browser = cache.get(browserKey)
+  
+  try {
+    if (browser === undefined) {
+      console.log('Creating browser...') // DEBUG
+      const options = Object.assign({}, browserOptions)
+      
+      if (interactive === true || interactive === 'true') {
+        options.headless = false
+      }
+      browser = await puppeteer.launch(options)
+      
+      cache.put(browserKey, browser, { finalizationCallback: () => { browser.close() }})
+      
+      return browser
+    }
+    else {
+      console.log('Connecting to existing browser...') // DEBUG
+      const browserWSEndpoint = browser.wsEndpoint()
+      return await puppeteer.connect({ browserWSEndpoint })
+    }
+  }
+  catch (e) {
+    console.error(e)
+    throw new Error('Error creating/connecting to browser.', { cause: e })
+  }
+}
+
+const func = ({ cache, model }) => async (req, res) => {
+  console.log('starting...') // DEBUG
   const { orgKey } = req.params
   // const org = getOrgFromKey({ model, orgKey, params: req.params, res })
   
@@ -40,22 +80,8 @@ const func = ({ model }) => async (req, res) => {
   // yes, we repeat org key, but it makes it easy to retrieve from the HTML page.
   const pageUrl = `http://127.0.0.1:32600/orgs/${orgKey}/roles/org-chart/page`
   
-  let browser
-  if (browserWSEndpoint === undefined) {
-    const options = {
-      args: [ '--allow-file-access-from-files' ],
-      headless: true
-    }
-    
-    if (interactive === true || interactive === 'true') {
-      options.headless = false
-    }
-    browser = await puppeteer.launch(options)
-    browserWSEndpoint = browser.wsEndpoint()
-  }
-  else {
-    browser = await puppeteer.connect({ browserWSEndpoint })
-  }
+  const browser = await getBrowser({ cache, interactive })
+  
   const page = await browser.newPage()
   page
     .on('console', message =>
@@ -64,10 +90,11 @@ const func = ({ model }) => async (req, res) => {
     .on('requestfailed', request =>
       console.log(`request to resource '${pageUrl}' failed`))
   
-  await page.goto(pageUrl, { waitUntil: 'networkidle0' })
-  
-  console.log('waiting on ready...') // DEBUG
   try {
+    await page.goto(pageUrl, { waitUntil: 'networkidle0' })
+    
+    console.log('waiting on ready...') // DEBUG
+  
     await page.waitForSelector('#ready', { timeout: 5000 })
     console.log('ready!') // DEBUG
   
@@ -101,16 +128,10 @@ const func = ({ model }) => async (req, res) => {
   }
   finally {
     console.log("I'm at the end...") // DEBUG
-    browser.disconnect()
     if (!interactive) {
-      try {
-        await browser.close()
-      }
-      catch (e) {
-        console.error('Could not close browser.', e)
-        throw(e)
-      }
+      await page.close()
     }
+    browser.disconnect()
   }
   
   if (!res.headersSent) {
