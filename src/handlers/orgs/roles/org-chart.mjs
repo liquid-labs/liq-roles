@@ -6,6 +6,8 @@
 * hours, hit a problem with a null 'baseVal' on the SVGElement with no clear workaround.
 *
 * The work was saved in a dead-end branch tagged 'server-side-attempt' with git hash 6097c51 (hash may be incorrect).
+*
+* TODO: extract the 'browser' to a 'liq-lib-puppeteer' project or something and make it a generally accessible resource.
 */
 import * as fs from 'fs/promises'
 
