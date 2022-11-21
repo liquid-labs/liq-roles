@@ -13,9 +13,8 @@
 <script src="./d3-org-chart.js"></script>
 <script src="./d3-flextree.js"></script>
 <body>
-<div id="main"></div>
-<div style="visibility: hidden" id="status">
-</div>
+<div id="main" style="max-height: 100px"></div>
+<div style="visibility: hidden" id="status"></div>
 
 <canvas id="canvas" width="800" height="400" style=""></canvas>
 <div id="png-container"></div>
@@ -105,13 +104,15 @@ d3.json('./data')
       var url = DOMURL.createObjectURL(blob);
       img.onload = function() {
           ctx.drawImage(img, 0, 0);
-          /* if we also wanted to generate a standalone PNG, we'd do this:
+          document.querySelector('#main').setAttribute('style', 'display: none')
+          /* How generate a standalone PNG (not totally working):
           var png = canvas.toDataURL("image/png;base64");
           document.querySelector('#png-container').innerHTML = '<img src="'+png+'"/>';
-          DOMURL.revokeObjectURL(png);*/
+          DOMURL.revokeObjectURL(png)*/
       };
       img.src = url;
-      window.scrollTo(rewidth / 2, reheight * 3/2)
+      window.scrollTo(rewidth / 2, reheight * 1/2)
+      
       // signal that everything is done
       d3.select('#status').attr('id', 'ready')
     }

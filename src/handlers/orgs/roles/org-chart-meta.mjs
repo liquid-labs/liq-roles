@@ -85,7 +85,6 @@ const func = ({ model }) => async (req, res) => {
   }
   else {
     const testFile = myDir + '/' + resource
-    console.log('testFile:', testFile)
     try {
       await fs.access(testFile) // raises exception if no file or can't otherwise access
       const contents = await fs.readFile(testFile)
