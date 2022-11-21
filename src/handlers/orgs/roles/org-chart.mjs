@@ -23,6 +23,11 @@ const parameters = [
   {
     name: 'output',
     description: "Path to save file with our without '.pdf' extension, which will be added if not present. A value of '-' will couse the data to be sent in the result as a PDF attachment."
+  },
+  {
+    name: 'writeFileLocally',
+    isBoolean: true,
+    description: "If true, then will write 'output' using 'fs' rather than sending as a result in the response."
   }
 ]
 
@@ -36,27 +41,32 @@ const browserOptions = {
   headless: true
 }
 
-const browserKey = 'liq-roles:browser'
+const browserKey = 'liq-roles:browserBundle'
 
 const getBrowser = async ({ cache, interactive }) => {
-  let browser = cache.get(browserKey)
+  let { browser, isInteractive } = cache.get(browserKey) || {}
+  
+  if (browser !== undefined && (interactive === 'true' || interactive === true) && isInteractive !== true) {
+    browser.close()
+    browser = undefined
+  }
   
   try {
     if (browser === undefined) {
-      console.log('Creating browser...') // DEBUG
       const options = Object.assign({}, browserOptions)
       
+      isInteractive = false
       if (interactive === true || interactive === 'true') {
         options.headless = false
+        isInteractive = true
       }
       browser = await puppeteer.launch(options)
       
-      cache.put(browserKey, browser, { finalizationCallback: () => { browser.close() }})
+      cache.put(browserKey, { browser, isInteractive }, { finalizationCallback: () => { browser.close() }})
       
       return browser
     }
     else {
-      console.log('Connecting to existing browser...') // DEBUG
       const browserWSEndpoint = browser.wsEndpoint()
       return await puppeteer.connect({ browserWSEndpoint })
     }
@@ -68,11 +78,10 @@ const getBrowser = async ({ cache, interactive }) => {
 }
 
 const func = ({ cache, model }) => async (req, res) => {
-  console.log('starting...') // DEBUG
   const { orgKey } = req.params
   // const org = getOrgFromKey({ model, orgKey, params: req.params, res })
   
-  const { interactive = false } = req.query
+  const { interactive = false, writeFileLocally = false } = req.query
   const output = !req.query.output
     ? 'org-chart.pdf' // TODO: append timestamp
     : req.query.output.toLowerCase().endsWith('.pdf')
@@ -94,20 +103,12 @@ const func = ({ cache, model }) => async (req, res) => {
   
   try {
     await page.goto(pageUrl, { waitUntil: 'networkidle0' })
-    
-    console.log('waiting on ready...') // DEBUG
   
     await page.waitForSelector('#ready', { timeout: 5000 })
-    console.log('ready!') // DEBUG
   
     const canvas = await page.waitForSelector('canvas')
-    console.log('canvas:', canvas) // DEBUG
     
-    // const height = canvas.attr('height')
     const [ height, width ] = await page.$eval('canvas', el => [ el.getAttribute('height'), el.getAttribute('width') ])
-    // const width = await page.$eval('canvas', el => el.getAttribute('height'))
-    
-    console.log('height: ' + height, 'width: ' + width) // DEBUG
     
     const pdfBits = await page.pdf({
       'height': height + 'px',
@@ -115,13 +116,18 @@ const func = ({ cache, model }) => async (req, res) => {
     })
     
     if (output === '-') {
-      res.setHeader('Content-Length', pdfBits.size)
+      res.setHeader('Content-Type', 'text/plain')
+      res.send(pdfBits)
+    }
+    else if (writeFileLocally !== true && writeFileLocally !== 'true') {
+      res.setHeader('Content-Length', pdfBits.length)
       res.setHeader('Content-Type', 'application/pdf')
-      res.setHeader(`Content-Disposition', 'attachment; filename=${output}`)
+      res.setHeader('Content-Disposition', `attachment; filename=${output}`)
       res.send(pdfBits)
     }
     else {
       fs.writeFile(output, pdfBits)
+      res.json({ msg: `Created org chart file '${output}'.` })
     }
   }
   catch (e) {
@@ -129,15 +135,10 @@ const func = ({ cache, model }) => async (req, res) => {
     throw(e)
   }
   finally {
-    console.log("I'm at the end...") // DEBUG
     if (!interactive) {
       await page.close()
     }
     browser.disconnect()
-  }
-  
-  if (!res.headersSent) {
-    res.json({ msg: `Created org chart file '${output}'.` })
   }
 }
 
