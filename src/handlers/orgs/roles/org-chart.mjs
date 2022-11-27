@@ -14,7 +14,7 @@ import * as fs from 'fs/promises'
 import puppeteer from 'puppeteer'
 
 const method = 'get'
-const path = '/orgs/:orgKey/roles/org-chart'
+const path = [ 'orgs', ':orgKey', 'roles', 'org-chart' ]
 const parameters = [
   {
     name: 'interactive',
@@ -78,15 +78,15 @@ const getBrowser = async ({ cache, interactive }) => {
 }
 
 const func = ({ cache, model }) => async (req, res) => {
-  const { orgKey } = req.params
+  const { orgKey } = req.vars
   // const org = getOrgFromKey({ model, orgKey, params: req.params, res })
   
   const { interactive = false, writeFileLocally = false } = req.query
-  const output = !req.query.output
+  const output = !req.vars.output
     ? 'org-chart.pdf' // TODO: append timestamp
     : req.query.output.toLowerCase().endsWith('.pdf')
-      ? output
-      : output + '.pdf'
+      ? req.vars.output
+      : req.vars.output + '.pdf'
   
   // yes, we repeat org key, but it makes it easy to retrieve from the HTML page.
   const pageUrl = `http://127.0.0.1:32600/orgs/${orgKey}/roles/org-chart/page`
