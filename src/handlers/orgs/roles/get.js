@@ -11,7 +11,6 @@ const parameters = []
 
 const func = ({ model }) => (req, res) => {
   const orgKey = req.params[0]
-  // req.params.orgKey = req.params[0] // DEBUG
   const org = getOrgFromKey({ model, orgKey, params: req.params, res })
   if (org === false) {
     return
