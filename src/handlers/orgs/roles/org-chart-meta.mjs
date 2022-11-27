@@ -33,7 +33,7 @@ const func = ({ model }) => async (req, res) => {
   }
   else if (resource === 'data') { // the company org chart model
     const org = getOrgFromKey({ model, params: req.params, res })
-    if (org === false) { // I think 'getOrgFromKey' generates the error
+    if (org === false) { // 'getOrgFromKey' generates the error response
       return
     }
     const staff = org.staff.list()
