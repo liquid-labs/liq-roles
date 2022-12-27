@@ -21,6 +21,12 @@ parameters.push({
   isBoolean: true,
   description: "If true, then will indicate the role directly granting access, where applicable."
 })
+parameters.push({
+  name: 'hideServices',
+  required: false,
+  isBoolean: true,
+  description: "If true, then will supppress inclusion of a sub-header row listing the actual services implied by each  domain bundle."
+})
 
 const func = ({ model, reporter }) => (req, res) => {
   const org = getOrgFromKey({ model, params: req.vars, res })
@@ -29,6 +35,7 @@ const func = ({ model, reporter }) => (req, res) => {
   const {
     allRoles=false,
     excludeRoleCount=false,
+    hideServices=false,
     includeSource=false,
     ...roleListOptions
   } = req.vars
@@ -37,7 +44,8 @@ const func = ({ model, reporter }) => (req, res) => {
   const rolesAccess = initializeRolesAccess(org)
 
   if (acceptedFormats[format] === undefined) {
-    res.status(400).json({ message: "The 'access-matrix' transform is compatible with table formats (csv, tsv) only." })
+    res.status(400)
+      .json({ message: "The 'access-matrix' transform is compatible with table formats (csv, tsv) only." })
     return
   }
   
@@ -65,6 +73,18 @@ const func = ({ model, reporter }) => (req, res) => {
   }
   serviceBundleRow.unshift('Title/role')
   tableStream.write(serviceBundleRow)
+
+  if (hideServices !== true) {
+    const serviceListRow = serviceBundleNames.map(r => {
+      const services = rolesAccess.serviceBundles.find(b => b.serviceBundle === r).services
+      return services.join(', ')
+    })
+    if (excludeRoleCount !== true) {
+      serviceListRow.unshift('')
+    }
+    serviceListRow.unshift('')
+    tableStream.write(serviceListRow)
+  } 
   
   const colWidth = serviceBundleRow.length
   
