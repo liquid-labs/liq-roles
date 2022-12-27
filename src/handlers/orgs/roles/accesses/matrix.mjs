@@ -22,6 +22,12 @@ parameters.push({
   description: "If true, then will indicate the role directly granting access, where applicable."
 })
 parameters.push({
+  name: 'excludeRoleCount',
+  required: false,
+  isBoolean: true,
+  description: "If true, then will supppress inclusion of a second column giving the count of staff in the named role."
+})
+parameters.push({
   name: 'hideServices',
   required: false,
   isBoolean: true,
