@@ -1,6 +1,6 @@
 import { handlers } from './serviceBundles'
 
-import * as accessMatrix from './access-matrix'
+import * as accessMatrix from './matrix'
 import * as chdAccess from './chd-access'
 import * as listRolesAccess from './list'
 
