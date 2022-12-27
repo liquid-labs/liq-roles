@@ -1,4 +1,4 @@
-import { handlers as accessHandlers } from './access'
+import { handlers as accessHandlers } from './accesses'
 import { handlers as policiesHandlers } from './policies'
 import * as getRole from './get'
 import * as listRoles from './list'

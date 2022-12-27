@@ -3,14 +3,12 @@ import { toCamelCase, toKebabCase } from 'js-convert-case'
 import { commonOutputParams, formatOutput, getOrgFromKey } from '@liquid-labs/liq-handlers-lib'
 
 const method = 'get'
-const path = '/orgs/:orgKey/roles/access/serviceBundles(/list)?'
+const path = [ 'orgs', ':orgKey', 'roles', 'accesses', 'service-bundles', 'list?' ]
 const parameters = commonOutputParams()
 
 const func = ({ model, reporter }) => (req, res) => {
-  const org = getOrgFromKey({ model, params: req.params, res })
-  if (org === false) {
-    return
-  }
+  const org = getOrgFromKey({ model, params: req.vars, res })
+  if (org === false) return // the above handles error responses
   
   const data = structuredClone(org.innerState.rolesAccess.serviceBundles)
     .sort((a, b) => a.serviceBundle.toLowerCase().localeCompare(b.serviceBundle.toLowerCase()))

@@ -7,7 +7,7 @@ import { commonRolesOutputParams } from '../lib'
 import * as transforms from './_transforms'
 
 const method = 'get'
-const path = [ 'orgs', ':orgKey', 'roles', 'access', 'list?' ]
+const path = [ 'orgs', ':orgKey', 'roles', 'accesses', 'list?' ]
 
 const parameters = commonOutputParams()
 

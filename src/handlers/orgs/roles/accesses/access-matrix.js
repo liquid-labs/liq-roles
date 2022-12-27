@@ -12,7 +12,7 @@ import { commonRolesOutputParams } from '../lib'
 import { accessMatrix } from './_transforms'
 
 const method = 'get'
-const path = [ 'orgs', ':orgKey', 'roles', 'access', 'matrix' ]
+const path = [ 'orgs', ':orgKey', 'roles', 'accesses', 'matrix' ]
 const parameters = commonOutputParams()
 parameters.push(...commonRolesOutputParams)
 parameters.push({
