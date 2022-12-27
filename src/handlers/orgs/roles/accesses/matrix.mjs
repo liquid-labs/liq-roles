@@ -65,8 +65,8 @@ const func = ({ model, reporter }) => (req, res) => {
   tableStream.pipe(res)
   
   const { directRulesByRole, serviceBundleNames } = rolesAccess
-  // This row itself is "just" the header and not referenced later, so it's OK if the serviceBundle names differ.
-  const serviceBundleRow = serviceBundleNames.map(r =>
+  // Staff + optional staff count + each service bundle name
+  const headerRow = serviceBundleNames.map(r =>
     `=HYPERLINK("#gid=${org.innerState.settings.s.security.ACCESS_MATRIX_BUNDLES_SHEET_GID}range=A${serviceBundleNames.indexOf(r) + 2}","${r}")`)
     /* originally did the following, but when imported, it wouldn't recognize the hyperlink even though entering the
        formula works
@@ -75,10 +75,10 @@ const func = ({ model, reporter }) => (req, res) => {
   // =HYPERLINK("#gid=1029216696range=A"&MATCH(LOWER("MOCA Admin Portal"),ARRAYFORMULA(LOWER('Service bundles'!A2:A)),0)+1, "Moca admin portal")
   
   if (excludeRoleCount !== true) {
-    serviceBundleRow.unshift('Staff #')
+    headerRow.unshift('Staff #')
   }
-  serviceBundleRow.unshift('Title/role')
-  tableStream.write(serviceBundleRow)
+  headerRow.unshift('Title/role')
+  tableStream.write(headerRow)
 
   if (hideServices !== true) {
     const serviceListRow = serviceBundleNames.map(r => {
@@ -92,7 +92,7 @@ const func = ({ model, reporter }) => (req, res) => {
     tableStream.write(serviceListRow)
   } 
   
-  const colWidth = serviceBundleRow.length
+  const colWidth = headerRow.length
   
   for (const role of org.roles.list({ sortFunc: sortRoleByAccessAndAlpha, ...roleListOptions })) {
     const roleName = role.name
