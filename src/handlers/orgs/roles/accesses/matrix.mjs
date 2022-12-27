@@ -9,7 +9,6 @@ import { commonOutputParams, formatOutput, getOrgFromKey } from '@liquid-labs/li
 
 import { initializeRolesAccess } from './_lib/roles-access-lib'
 import { commonRolesOutputParams } from '../lib'
-import { accessMatrix } from './_transforms'
 
 const method = 'get'
 const path = [ 'orgs', ':orgKey', 'roles', 'accesses', 'matrix' ]
