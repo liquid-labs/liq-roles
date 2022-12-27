@@ -3,8 +3,7 @@
 
 default: build
 
-NPM_BIN:=$(shell npm bin)
-CATALYST_SCRIPTS:=$(NPM_BIN)/catalyst-scripts
+CATALYST_SCRIPTS:=npx catalyst-scripts
 
 LIQ_ROLES_SRC:=src/
 LIQ_ROLES_FILES:=$(shell find $(LIQ_ROLES_SRC) \( -name "*.js" -o -name "*.mjs" \) -not -path "*/test/*" -not -name "*.test.js")
