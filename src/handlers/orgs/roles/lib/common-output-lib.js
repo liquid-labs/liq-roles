@@ -1,5 +1,11 @@
 const commonRolesOutputParams = [
   {
+    name: 'allRoles',
+    required: false,
+    isBoolean: true,
+    description: 'If true, then all roles, including titular, designated, indirect, and staff roles.'
+  },
+  {
     name: 'excludeDesignated',
     required: false,
     isBoolean: true,

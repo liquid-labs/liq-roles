@@ -27,7 +27,7 @@ parameters.push({
 const func = ({ model, reporter }) => (req, res) => {
   const subjectsGenerator = ({ org }) => org.staff.list({ excludeLogical: true })
   const accessTest = (staff, baseRole) => staff.hasRole(baseRole)
-  const rowLabelGenerator = (staffMember) => staffMember.email
+  const rowLabelGenerator = ({ subject: staffMember }) => staffMember.email
 
   createAccessMatrix({ 
     accessTest, 

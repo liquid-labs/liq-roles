@@ -5,7 +5,17 @@ import { formatOutput, getOrgFromKey } from '@liquid-labs/liq-handlers-lib'
 
 import { initializeRolesAccess } from '../roles/accesses/_lib/roles-access-lib'
 
-const createAccessMatrix = ({ accessTest, model, req, res, rowLabelGenerator, subjectsGenerator, subjectHeader }) => {
+const createAccessMatrix = ({ 
+	accessTest, 
+	model, 
+	req, 
+	res, 
+	rowLabelGenerator, 
+	subjectsGenerator, 
+	subjectHeader, 
+	subjectSummaryHeader, 
+	subjectSummaryGenerator 
+}) => {
 	const org = getOrgFromKey({ model, params: req.vars, res })
   if (org === false) return // error response handled by lib
 
@@ -37,7 +47,14 @@ const createAccessMatrix = ({ accessTest, model, req, res, rowLabelGenerator, su
   // Staff + optional staff count + each service bundle name
   const headerRow = serviceBundleNames.map(r =>
     `=HYPERLINK("#gid=${org.innerState.settings.s.security.ACCESS_MATRIX_BUNDLES_SHEET_GID}range=A${serviceBundleNames.indexOf(r) + 2}","${r}")`)
+  /* originally did the following, but when imported, it wouldn't recognize the hyperlink even though entering the
+   formula works
+  `=HYPERLINK("#gid=${org.innerState.settings.s.security.ACCESS_MATRIX_BUNDLES_SHEET_GID}range=A"&(MATCH(LOWER("${r}"),ARRAYFORMULA(LOWER('Service bundles'!A2:A)),0)+1),"${r}")`)
+  */
 
+  if (subjectSummaryGenerator !== undefined) {
+    headerRow.unshift(subjectSummaryHeader)
+  }
   headerRow.unshift(subjectHeader)
   tableStream.write(headerRow)
 
@@ -47,6 +64,7 @@ const createAccessMatrix = ({ accessTest, model, req, res, rowLabelGenerator, su
       return services.join(', ')
     })
     serviceListRow.unshift('')
+    if (subjectSummaryGenerator !== undefined) serviceListRow.unshift('')
     tableStream.write(serviceListRow)
   } 
   
@@ -55,9 +73,9 @@ const createAccessMatrix = ({ accessTest, model, req, res, rowLabelGenerator, su
   for (const subject of subjectsGenerator({ org, rolesAccess })) {
   	const row = Array.from({length: colWidth}, () => null)
 
-  	row[0] = rowLabelGenerator(subject)
+  	row[0] = rowLabelGenerator({ org, subject })
     
-    const offset = 1
+    const offset = subjectSummaryGenerator === undefined ? 1 : 2
     
     // Fill in the rest of the row with either 'null' or an array of access rules.
     // e.g. { serviceBundle, type }
@@ -88,24 +106,6 @@ const acceptedFormats = {
   csv: true,
   tsv: true,
   'tab-separated-values': true
-}
-
-// TODO: copied from liq-policy/src/liq-gen-roles-ref/lib/helpers.js
-const headerRef = (roleName) => roleName.toLowerCase().replace(/[^\w -]*/g, '').replace(/ /g, '-')
-
-const sortRoleByAccessAndAlpha = (a, b) => {
-  const aHasAccess = Object.keys(a.getAccess()).length > 0
-  const bHasAccess = Object.keys(b.getAccess()).length > 0
-  
-  if (aHasAccess === bHasAccess) {
-    return a.name.localeCompare(b.name)
-  }
-  else if (aHasAccess) {
-    return -1
-  }
-  else {
-    return 1
-  }
 }
 
 export { createAccessMatrix }
