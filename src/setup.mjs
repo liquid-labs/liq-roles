@@ -19,7 +19,7 @@ const setup = ({ model, reporter }) => {
       buildTargets,
       rulesDecls : () => `${buildTargets[0]}:
 \tmkdir -p $(dir $@)
-\tliq orgs ${orgKey} roles access list -- transform=chdAccess > "$@"
+\tliq2 orgs ${orgKey} roles accesses chd-access > "$@"
 \tcat ${policyRepoPath}/src/assets/${reportPath.slice(0,-3)}.append.md >> "$@"
 `
     })
