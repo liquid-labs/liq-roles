@@ -3,7 +3,7 @@ import { commonOutputConfig, commonOutputParams, formatOutput, getOrgFromKey } f
 import { commonRolesOutputParams } from './lib'
 
 const method = 'get'
-const path = '/orgs/:orgKey/roles/list'
+const path = [ 'orgs', ':orgKey', 'roles', 'list' ]
 // excludeDesignated, fields, includeIndirect, noHeaders as of 2022-04-30
 const parameters = commonOutputParams()
 parameters.push(...commonRolesOutputParams)
@@ -31,13 +31,10 @@ const mdFormatter = (roles, title) => {
 }
 
 const func = ({ model, reporter }) => (req, res) => {
-  const org = getOrgFromKey({ model, params: req.params, res })
-  if (org === false) {
-    return
-  }
-  // const { includeIndirect = false, excludeDesignated = false } = req.query
+  const org = getOrgFromKey({ model, params: req.vars, res })
+  if (org === false) return // error reeportaing already handled
   
-  const roles = org.roles.list(Object.assign({}, req.query, { clean : true, rawData : true }))
+  const roles = org.roles.list(Object.assign({}, req.vars, { clean : true, rawData : true }))
 
   formatOutput({
     basicTitle : 'Roles Report',
