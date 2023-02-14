@@ -8,7 +8,7 @@ import { chdAccess } from './_transforms'
 
 const method = 'get'
 const path = [ 'orgs', ':orgKey', 'roles', 'accesses', 'chd-access' ]
-const parameters = commonOutputParams()
+const parameters = [...commonOutputParams()]
 parameters.push(...commonRolesOutputParams)
 parameters.push({
   name: 'includeSource',

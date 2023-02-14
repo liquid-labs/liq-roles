@@ -5,7 +5,7 @@ import { commonRolesOutputParams } from './lib'
 const method = 'get'
 const path = [ 'orgs', ':orgKey', 'roles', 'list' ]
 // excludeDesignated, fields, includeIndirect, noHeaders as of 2022-04-30
-const parameters = commonOutputParams()
+const parameters = [...commonOutputParams()]
 parameters.push(...commonRolesOutputParams)
 
 const mdFormatter = (roles, title) => {

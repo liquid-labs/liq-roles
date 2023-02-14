@@ -9,7 +9,7 @@ import { commonRolesOutputParams } from '../roles/lib'
 
 const method = 'get'
 const path = [ 'orgs', ':orgKey', 'staff', 'access-matrix' ]
-const parameters = commonOutputParams()
+const parameters = [...commonOutputParams()]
 parameters.push(...commonRolesOutputParams)
 parameters.push({
   name: 'includeSource',
