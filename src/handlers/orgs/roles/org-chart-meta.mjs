@@ -22,7 +22,7 @@ const resourceMap = {
 }
 
 const func = ({ model }) => async (req, res) => {
-  const { resource } = req.params // what kind of thing are we looking for?
+  const { orgKey, resource } = req.params // what kind of thing are we looking for?
   
   if (resource === 'page') { // the base HTML page
     const pagePath = myDir + '/canvas.html'
@@ -32,29 +32,51 @@ const func = ({ model }) => async (req, res) => {
       .send(contents)
   }
   else if (resource === 'data') { // the company org chart model
-    const org = getOrgFromKey({ model, params: req.params, res })
+    const org = getOrgFromKey({ model, orgKey, res })
     if (org === false) { // 'getOrgFromKey' generates the error response
       return
     }
     const staff = org.staff.list()
     const data = []
     for (const staffMember of staff) {
+      let rootRoles = []
       for (const role of staffMember.getOwnRoles()) {
-        if (role.designated) continue
         const roleName = role.name
         if (roleName === 'Staff' || roleName === 'Contractor' || roleName === 'Employee') continue
-        
-        const datum = {
-          id : staffMember.email + '/' + role.name,
-          email: staffMember.email,
-          name: `${staffMember.givenName} ${staffMember.familyName} <${staffMember.email}>`,
-          title: role.name
+
+        if (rootRoles.length === 0) {
+          rootRoles.push(role)
         }
-        if (role.managerEmail) {
-          datum.parentId = role.managerEmail + '/' + role.managerRole
+        if (role.designated) {
+          const rootDatum = data.find((d) => d.email === staffMember.email && d.title === rootRoles[0].name)
+          rootDatum.secondaryRoles.push(roleName)
+          continue
         }
-        
-        data.push(datum)
+        let handled = false
+        // The collapse logic could be more robust
+        for (const rootRole of rootRoles) {
+          if (rootRole.name !== roleName && rootRole.impliesRole(roleName) || role.manager === staffMember.email) {
+            const rootDatum = data.find((d) => d.email === staffMember.email && d.title === rootRole.name)
+            rootDatum.secondaryRoles.push(roleName)
+            handled = true
+            break
+          }
+        }
+        if (handled === false) {
+          rootRoles.push(role)
+          const datum = {
+            id : staffMember.email + '/' + role.name,
+            email: staffMember.email,
+            name: `${staffMember.givenName} ${staffMember.familyName} <${staffMember.email}>`,
+            title: role.name,
+            secondaryRoles: []
+          }
+          if (role.managerEmail) {
+            datum.parentId = role.managerEmail + '/' + role.managerRole
+          }
+          
+          data.push(datum)
+        }
       }
     }
     /*
