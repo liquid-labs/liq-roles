@@ -7,9 +7,10 @@
     "build": "make",
     "lint": "make lint",
     "lint:fix": "make lint-fix",
-    "test": "echo 'Need to implement testing!'",
+    "prepare": "! test -f Makefile || make build",
+    "test": "make test",
     "preversion": "npm test && make lint",
-    "postversion": "git push upstream v${npm_package_version}"
+    "qa": "make qa"
   },
   "keywords": [],
   "author": "Zane Rockenbaugh <zane@liquid-labs.com>",
