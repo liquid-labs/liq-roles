@@ -1,6 +1,6 @@
 import * as listPoliciesByRole from './list'
 
-const handlers = [ listPoliciesByRole ]
+const handlers = [listPoliciesByRole]
 
 export {
   handlers

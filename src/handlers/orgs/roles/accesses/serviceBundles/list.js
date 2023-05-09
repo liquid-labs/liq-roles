@@ -1,23 +1,21 @@
-import { toCamelCase, toKebabCase } from 'js-convert-case'
-
 import { commonOutputParams, formatOutput, getOrgFromKey } from '@liquid-labs/liq-handlers-lib'
 
 const method = 'get'
-const path = [ 'orgs', ':orgKey', 'roles', 'accesses', 'service-bundles', 'list?' ]
+const path = ['orgs', ':orgKey', 'roles', 'accesses', 'service-bundles', 'list?']
 const parameters = commonOutputParams()
 
 const func = ({ model, reporter }) => (req, res) => {
-  const org = getOrgFromKey({ model, params: req.vars, res })
+  const org = getOrgFromKey({ model, params : req.vars, res })
   if (org === false) return // the above handles error responses
-  
+
   const data = structuredClone(org.innerState.rolesAccess.serviceBundles)
     .sort((a, b) => a.serviceBundle.toLowerCase().localeCompare(b.serviceBundle.toLowerCase()))
-  
+
   formatOutput({
-    basicTitle: 'Service Bundle Report', // <- ignored if 'reportTitle' set
+    basicTitle : 'Service Bundle Report', // <- ignored if 'reportTitle' set
     data,
     dataFlattener,
-    /*mdFormatter,*/
+    /* mdFormatter, */
     reporter,
     req,
     res,
@@ -27,7 +25,7 @@ const func = ({ model, reporter }) => (req, res) => {
 
 const dataFlattener = ({ serviceBundle, services }) => ({
   serviceBundle,
-  services: services.join(', ')
+  services : services.join(', ')
 })
 /*
 const mdAccessMapper = ({ serviceBundle, type }) => `${type} access to ${serviceBundle}`
@@ -54,8 +52,8 @@ const applyTransform = ({ res, transformName, ...transformOptions }) => {
       .json({ message: `Uknown transform'${transformName}'; try one of: ${Object.keys(transforms).map(t => toKebabCase(t)) }` })
     return
   }
-  
+
   transform({ res, ...transformOptions })
 }
 */
-export { func, path, method }
+export { func, parameters, path, method }

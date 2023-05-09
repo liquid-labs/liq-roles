@@ -8,8 +8,8 @@ const method = 'get'
 const path = '/orgs/:orgKey/roles/org-chart/:resource'
 const parameters = [
   {
-    name: 'resource',
-    description: "The meta-data to be retrieved. May be either 'page', 'data', or a known resource required by the page.",
+    name        : 'resource',
+    description : "The meta-data to be retrieved. May be either 'page', 'data', or a known resource required by the page."
   }
 ]
 
@@ -17,16 +17,16 @@ const myDir = dirname(fileURLToPath(import.meta.url))
 
 // resources referenced by the page
 const resourceMap = {
-  'd3-org-chart.js': myDir + '/../node_modules/d3-org-chart/build/d3-org-chart.js',
-  'd3-svg-to-png.js': myDir + '/../node_modules/d3-svg-to-png/index.js'
+  'd3-org-chart.js'  : myDir + '/../node_modules/d3-org-chart/build/d3-org-chart.js',
+  'd3-svg-to-png.js' : myDir + '/../node_modules/d3-svg-to-png/index.js'
 }
 
-const func = ({ model }) => async (req, res) => {
+const func = ({ model }) => async(req, res) => {
   const { orgKey, resource } = req.params // what kind of thing are we looking for?
-  
+
   if (resource === 'page') { // the base HTML page
     const pagePath = myDir + '/canvas.html'
-    
+
     const contents = await fs.readFile(pagePath)
     res.type('text/html')
       .send(contents)
@@ -39,7 +39,7 @@ const func = ({ model }) => async (req, res) => {
     const staff = org.staff.list()
     const data = []
     for (const staffMember of staff) {
-      let rootRoles = []
+      const rootRoles = []
       for (const role of staffMember.getOwnRoles()) {
         const roleName = role.name
         if (roleName === 'Staff' || roleName === 'Contractor' || roleName === 'Employee') continue
@@ -55,7 +55,7 @@ const func = ({ model }) => async (req, res) => {
         let handled = false
         // The collapse logic could be more robust
         for (const rootRole of rootRoles) {
-          if (rootRole.name !== roleName && rootRole.impliesRole(roleName) || role.manager === staffMember.email) {
+          if ((rootRole.name !== roleName && rootRole.impliesRole(roleName)) || role.manager === staffMember.email) {
             const rootDatum = data.find((d) => d.email === staffMember.email && d.title === rootRole.name)
             rootDatum.secondaryRoles.push(roleName)
             handled = true
@@ -65,16 +65,16 @@ const func = ({ model }) => async (req, res) => {
         if (handled === false) {
           rootRoles.push(role)
           const datum = {
-            id : staffMember.email + '/' + role.name,
-            email: staffMember.email,
-            name: `${staffMember.givenName} ${staffMember.familyName} <${staffMember.email}>`,
-            title: role.name,
-            secondaryRoles: []
+            id             : staffMember.email + '/' + role.name,
+            email          : staffMember.email,
+            name           : `${staffMember.givenName} ${staffMember.familyName} <${staffMember.email}>`,
+            title          : role.name,
+            secondaryRoles : []
           }
           if (role.managerEmail) {
             datum.parentId = role.managerEmail + '/' + role.managerRole
           }
-          
+
           data.push(datum)
         }
       }
@@ -87,14 +87,14 @@ const func = ({ model }) => async (req, res) => {
             impliedRle.display !== false
               && impliedRole.mngrProtocol
           )
-        
+
           role.implies && role.implies.filter(impSpec =>
             impSpec.display !== false
             && impSpec.mngrProtocol === 'same'
               && node.ids.indexOf(`${node.email}/${impSpec.mergeWith}`) >= 0)
             .map(i => i.name)
-    }*/
-    
+    } */
+
     res.type('application/json')
       .send(data)
   }
@@ -118,7 +118,7 @@ const func = ({ model }) => async (req, res) => {
     }
     catch (e) {
       console.error(e)
-      res.status(400).json({ message: `Unknown meta data request resource '${resource}'.` })
+      res.status(400).json({ message : `Unknown meta data request resource '${resource}'.` })
     }
   }
 }

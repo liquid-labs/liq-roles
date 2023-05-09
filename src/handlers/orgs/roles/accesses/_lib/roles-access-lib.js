@@ -7,13 +7,13 @@ class RolesAccessLib {
     Object.assign(this, org.innerState.rolesAccess)
     org.rolesAccess = this
     this.org = org
-    
+
     this.directRulesByRole = {}
     this.serviceBundleNames = []
     this.serviceBundlesToOrdering = {}
     this.verifyAndIndexData()
   }
-  
+
   /**
   * - Ensures the access roles are valid.
   * - Sorts the serviceBundles and caches their alpha ordered position in 'serviceBundlesToOrdering'.
@@ -24,10 +24,10 @@ class RolesAccessLib {
     // TODO: It's actually more like 'roleRules'
     for (const { role, access = [], policy = [] } of this.accessRules.sort((a, b) => a.role.localeCompare(b.role))) {
       // verify the role is known
-      if (this.org.roles.get(role, { rawData: true }) === undefined) {
+      if (this.org.roles.get(role, { rawData : true }) === undefined) {
         errors.push(`No such role '${role}' as referenced from 'access roles'.`)
       }
-      
+
       // track the unique serviceBundles; it's possible the same access is iheritted from multiple sources
       for (const { serviceBundle } of access) {
         if (!(serviceBundle in this.serviceBundlesToOrdering)) {
@@ -35,27 +35,27 @@ class RolesAccessLib {
           this.serviceBundleNames.push(serviceBundle)
         }
       }
-      
-      this.directRulesByRole[role] = { access , policy }
+
+      this.directRulesByRole[role] = { access, policy }
     } // for this.accessRules loop
-    
+
     // now, we sort the serviceBundles
-    this.serviceBundleNames.sort((a,b) => a.toLowerCase().localeCompare(b.toLowerCase()))
-    this.serviceBundleNames.forEach((d,i) => {
+    this.serviceBundleNames.sort((a, b) => a.toLowerCase().localeCompare(b.toLowerCase()))
+    this.serviceBundleNames.forEach((d, i) => {
       this.serviceBundlesToOrdering[d] = i
     })
-    
+
     if (errors.length > 0) {
       throw new Error('There were errors loading the access rules: ' + errors.join(' '))
     }
   }
-  
+
   getDomainOrdering(serviceBundle) {
     return this.serviceBundlesToOrdering[serviceBundle]
   }
-  
+
   // TODO: could be static, except then not visible from instance; could append, or just leave.
-  accessRulesToSummaries(row, { excludeRoleCount=false, includeSource=false }) {
+  accessRulesToSummaries(row, { excludeRoleCount = false, includeSource = false }) {
     return row.map((e, i) => { // each row, which is a collection
       // 0 is always the role name, so we keep it
       if (i === 0) return e
@@ -71,38 +71,39 @@ class RolesAccessLib {
           const bRank = rankAccessType(bType)
           return aRank === bRank ? 0 : aRank > bRank ? 1 : -1
         })
-        .filter(({ type }, i, array) => {
-          if (i === array.length - 1) {
-            return true
-          }
-          // else, let's see if the current rule is subsumed by the later rule
-          const nextType = array[i + 1].type
-          if (type === nextType) {
-            return false // if it's duped, then we can drop it
-          }
-          else if (type === 'reader') {
-            switch (nextType) {
+          .filter(({ type }, i, array) => {
+            if (i === array.length - 1) {
+              return true
+            }
+            // else, let's see if the current rule is subsumed by the later rule
+            const nextType = array[i + 1].type
+            if (type === nextType) {
+              return false // if it's duped, then we can drop it
+            }
+            else if (type === 'reader') {
+              switch (nextType) {
               case 'reader':
               case 'editor':
               case 'admin':
                 return false
               default:
                 return true
+              }
             }
-          }
-          else if (type === 'editor') {
-            switch (nextType) {
+            else if (type === 'editor') {
+              switch (nextType) {
               case 'editor':
               case 'admin':
                 return false
               default:
                 return true
+              }
             }
-          }
-        })
-        .map(({ type, source }) => {
-          return `${type}${includeSource ? ` (${source})` : ''}`
-        }).join('; ')
+            return false
+          })
+          .map(({ type, source }) => {
+            return `${type}${includeSource ? ` (${source})` : ''}`
+          }).join('; ')
       }
     }) // row.map
   } // accessRulesToSummaries
@@ -130,4 +131,4 @@ const rankAccessType = (type) => {
   return rank
 }
 
-export { initializeRolesAccess }
+export { initializeRolesAccess, rankAccessType, ORDERED_ACCESS_TYPE }
