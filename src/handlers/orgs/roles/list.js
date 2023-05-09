@@ -3,7 +3,7 @@ import { commonOutputConfig, commonOutputParams, formatOutput, getOrgFromKey } f
 import { commonRolesOutputParams } from './lib'
 
 const method = 'get'
-const path = [ 'orgs', ':orgKey', 'roles', 'list' ]
+const path = ['orgs', ':orgKey', 'roles', 'list']
 // excludeDesignated, fields, includeIndirect, noHeaders as of 2022-04-30
 const parameters = [...commonOutputParams()]
 parameters.push(...commonRolesOutputParams)
@@ -13,32 +13,32 @@ const mdFormatter = (roles, title) => {
   for (const { name, summary, superRole, implies = [] } of roles) {
     markdownBuf.push(
       `## ${name}\n`,
-      "### Summary\n",
-      summary+"\n"
+      '### Summary\n',
+      summary + '\n'
     )
     if (superRole || implies.length > 0) {
-      markdownBuf.push("### Implies\n")
+      markdownBuf.push('### Implies\n')
       if (superRole && implies.findIndex((i) => i.name === superRole.name) === -1) {
-        implies.unshift({ name: superRole.name, mngrProtocol: 'self' })
+        implies.unshift({ name : superRole.name, mngrProtocol : 'self' })
       }
       for (const { name: impliedName } of implies) {
         markdownBuf.push(`- [${impliedName}](#${toKebabCase(impliedName)})`)
       }
-      markdownBuf.push("\n")
+      markdownBuf.push('\n')
     }
   }
-  return markdownBuf.join("\n")
+  return markdownBuf.join('\n')
 }
 
 const func = ({ model, reporter }) => (req, res) => {
-  const org = getOrgFromKey({ model, params: req.vars, res })
+  const org = getOrgFromKey({ model, params : req.vars, res })
   if (org === false) return // error reeportaing already handled
-  
+
   const roles = org.roles.list(Object.assign({}, req.vars, { clean : true, rawData : true }))
 
   formatOutput({
     basicTitle : 'Roles Report',
-    data : roles,
+    data       : roles,
     mdFormatter,
     reporter,
     req,

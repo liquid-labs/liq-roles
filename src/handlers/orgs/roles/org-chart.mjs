@@ -14,20 +14,20 @@ import * as fs from 'fs/promises'
 import puppeteer from 'puppeteer'
 
 const method = 'get'
-const path = [ 'orgs', ':orgKey', 'roles', 'org-chart' ]
+const path = ['orgs', ':orgKey', 'roles', 'org-chart']
 const parameters = [
   {
-    name: 'interactive',
-    description: 'Launches a regular (non-headless) browser.'
+    name        : 'interactive',
+    description : 'Launches a regular (non-headless) browser.'
   },
   {
-    name: 'output',
-    description: "Path to save file with our without '.pdf' extension, which will be added if not present. A value of '-' will couse the data to be sent in the result as a PDF attachment."
+    name        : 'output',
+    description : "Path to save file with our without '.pdf' extension, which will be added if not present. A value of '-' will couse the data to be sent in the result as a PDF attachment."
   },
   {
-    name: 'writeFileLocally',
-    isBoolean: true,
-    description: "If true, then will write 'output' using 'fs' rather than sending as a result in the response."
+    name        : 'writeFileLocally',
+    isBoolean   : true,
+    description : "If true, then will write 'output' using 'fs' rather than sending as a result in the response."
   }
 ]
 
@@ -37,33 +37,33 @@ const parameters = [
 */
 // let browserWSEndpoint = undefined
 const browserOptions = {
-  args: [ '--allow-file-access-from-files' ],
-  headless: true
+  args     : ['--allow-file-access-from-files'],
+  headless : true
 }
 
 const browserKey = 'liq-roles:browserBundle'
 
-const getBrowser = async ({ cache, interactive }) => {
+const getBrowser = async({ cache, interactive }) => {
   let { browser, isInteractive } = cache.get(browserKey) || {}
-  
+
   if (browser !== undefined && (interactive === 'true' || interactive === true) && isInteractive !== true) {
     browser.close()
     browser = undefined
   }
-  
+
   try {
     if (browser === undefined) {
       const options = Object.assign({}, browserOptions)
-      
+
       isInteractive = false
       if (interactive === true || interactive === 'true') {
         options.headless = false
         isInteractive = true
       }
       browser = await puppeteer.launch(options)
-      
-      cache.put(browserKey, { browser, isInteractive }, { finalizationCallback: () => { browser.close() }})
-      
+
+      cache.put(browserKey, { browser, isInteractive }, { finalizationCallback : () => { browser.close() } })
+
       return browser
     }
     else {
@@ -73,26 +73,26 @@ const getBrowser = async ({ cache, interactive }) => {
   }
   catch (e) {
     console.error(e)
-    throw new Error('Error creating/connecting to browser.', { cause: e })
+    throw new Error('Error creating/connecting to browser.', { cause : e })
   }
 }
 
-const func = ({ cache, model }) => async (req, res) => {
+const func = ({ cache, model }) => async(req, res) => {
   const { orgKey } = req.vars
   // const org = getOrgFromKey({ model, orgKey, params: req.params, res })
-  
+
   const { interactive = false, writeFileLocally = false } = req.query
   const output = !req.vars.output
     ? 'org-chart.pdf' // TODO: append timestamp
     : req.query.output.toLowerCase().endsWith('.pdf')
       ? req.vars.output
       : req.vars.output + '.pdf'
-  
+
   // yes, we repeat org key, but it makes it easy to retrieve from the HTML page.
   const pageUrl = `http://127.0.0.1:32600/orgs/${orgKey}/roles/org-chart/page`
-  
+
   const browser = await getBrowser({ cache, interactive })
-  
+
   const page = await browser.newPage()
   page
     .on('console', message =>
@@ -100,21 +100,21 @@ const func = ({ cache, model }) => async (req, res) => {
     .on('pageerror', ({ message }) => console.log(message))
     .on('requestfailed', request =>
       console.log(`request to resource '${pageUrl}' failed`))
-  
+
   try {
-    await page.goto(pageUrl, { waitUntil: 'networkidle0' })
-  
-    await page.waitForSelector('#ready', { timeout: 5000 })
-  
+    await page.goto(pageUrl, { waitUntil : 'networkidle0' })
+
+    await page.waitForSelector('#ready', { timeout : 5000 })
+
     const canvas = await page.waitForSelector('canvas')
-    
-    const [ height, width ] = await page.$eval('canvas', el => [ el.getAttribute('height'), el.getAttribute('width') ])
-    
+
+    const [height, width] = await page.$eval('canvas', el => [el.getAttribute('height'), el.getAttribute('width')])
+
     const pdfBits = await page.pdf({
-      'height': height + 'px',
-      'width': width + 'px'
+      height : height + 'px',
+      width  : width + 'px'
     })
-    
+
     if (output === '-') {
       res.setHeader('Content-Type', 'text/plain')
       res.send(pdfBits)
@@ -127,12 +127,12 @@ const func = ({ cache, model }) => async (req, res) => {
     }
     else {
       fs.writeFile(output, pdfBits)
-      res.json({ msg: `Created org chart file '${output}'.` })
+      res.json({ msg : `Created org chart file '${output}'.` })
     }
   }
   catch (e) {
     console.error(e)
-    throw(e)
+    throw (e)
   }
   finally {
     if (!interactive) {

@@ -5,44 +5,44 @@ import { formatOutput, getOrgFromKey } from '@liquid-labs/liq-handlers-lib'
 
 import { initializeRolesAccess } from '../roles/accesses/_lib/roles-access-lib'
 
-const createAccessMatrix = ({ 
-	accessTest, 
-	model, 
-	req, 
-	res, 
-	rowLabelGenerator, 
-	subjectsGenerator, 
-	subjectHeader, 
-	subjectSummaryHeader, 
-	subjectSummaryGenerator 
+const createAccessMatrix = ({
+  accessTest,
+  model,
+  req,
+  res,
+  rowLabelGenerator,
+  subjectsGenerator,
+  subjectHeader,
+  subjectSummaryHeader,
+  subjectSummaryGenerator
 }) => {
-	const org = getOrgFromKey({ model, params: req.vars, res })
+  const org = getOrgFromKey({ model, params : req.vars, res })
   if (org === false) return // error response handled by lib
 
   const {
-    hideServices=false,
-    includeSource=false,
+    hideServices = false,
+    includeSource = false,
     ...roleListOptions
   } = req.vars
-  let { format='csv' } = req.vars
-  
+  let { format = 'csv' } = req.vars
+
   const rolesAccess = initializeRolesAccess(org)
 
   if (acceptedFormats[format] === undefined) {
     res.status(400)
-      .json({ message: "The 'access-matrix' transform is compatible with table formats (csv, tsv) only." })
+      .json({ message : "The 'access-matrix' transform is compatible with table formats (csv, tsv) only." })
     return
   }
-  
+
   if (format === 'tsv') {
     format = 'tab-separated-values'
   }
-  
+
   res.type(`text/${format}`)
-  const delimiter = format === 'csv' ? ',' : "\t"
+  const delimiter = format === 'csv' ? ',' : '\t'
   const tableStream = formatTable({ delimiter })
   tableStream.pipe(res)
-  
+
   const { directRulesByRole, serviceBundleNames } = rolesAccess
   // Staff + optional staff count + each service bundle name
   const headerRow = serviceBundleNames.map(r =>
@@ -66,23 +66,23 @@ const createAccessMatrix = ({
     serviceListRow.unshift('')
     if (subjectSummaryGenerator !== undefined) serviceListRow.unshift('')
     tableStream.write(serviceListRow)
-  } 
-  
+  }
+
   const colWidth = headerRow.length
-  
+
   for (const subject of subjectsGenerator({ org, rolesAccess })) {
-  	const row = Array.from({length: colWidth}, () => null)
+  	const row = Array.from({ length : colWidth }, () => null)
 
   	row[0] = rowLabelGenerator({ org, subject })
-    
+
     const offset = subjectSummaryGenerator === undefined ? 1 : 2
-    
+
     // Fill in the rest of the row with either 'null' or an array of access rules.
     // e.g. { serviceBundle, type }
     for (const baseRole of Object.keys(directRulesByRole)) {
       if (accessTest(subject, baseRole)) {
         const directAccessRules = directRulesByRole[baseRole]?.access || []
-      
+
         // TODO: we could pre-index the build up across super-roles
         for (const directAccessRule of directAccessRules) {
           directAccessRule.source = baseRole
@@ -94,8 +94,8 @@ const createAccessMatrix = ({
         }
       }
     }
-    
-    const summaryRow = rolesAccess.accessRulesToSummaries(row, { excludeRoleCount: true, includeSource })
+
+    const summaryRow = rolesAccess.accessRulesToSummaries(row, { excludeRoleCount : true, includeSource })
     tableStream.write(summaryRow)
   } // end role iteration
   tableStream.end()
@@ -103,9 +103,9 @@ const createAccessMatrix = ({
 }
 
 const acceptedFormats = {
-  csv: true,
-  tsv: true,
-  'tab-separated-values': true
+  csv                    : true,
+  tsv                    : true,
+  'tab-separated-values' : true
 }
 
 export { createAccessMatrix }

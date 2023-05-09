@@ -11,15 +11,15 @@ const parameters = []
 
 const func = ({ model }) => (req, res) => {
   const orgKey = req.params[0]
-  const org = getOrgFromKey({ model, orgKey, params: req.params, res })
+  const org = getOrgFromKey({ model, orgKey, params : req.params, res })
   if (org === false) {
     return
   }
   const roleName = req.params[1]
-  
+
   const role = org.roles.get(roleName)
   if (!role) {
-    res.status(404).json({ message: `No such role '${roleName}' found.` })
+    res.status(404).json({ message : `No such role '${roleName}' found.` })
   }
   else {
     res.json(role)

@@ -8,19 +8,19 @@ const setup = ({ model, reporter }) => {
     if (!org.policies._make) {
       org.policies._make = []
     }
-    
+
     const buildTargets = [
       '$(OUT_DIR)/' + reportPath
     ]
-    
+
     const { policyDataRepoPath, policyRepoPath } = org
-    
+
     org.policies._make.push({
       buildTargets,
       rulesDecls : () => `${buildTargets[0]}:
 \tmkdir -p $(dir $@)
 \tliq2 orgs ${orgKey} roles accesses chd-access > "$@"
-\tcat ${policyRepoPath}/src/assets/${reportPath.slice(0,-3)}.append.md >> "$@"
+\tcat ${policyRepoPath}/src/assets/${reportPath.slice(0, -3)}.append.md >> "$@"
 `
     })
   }
