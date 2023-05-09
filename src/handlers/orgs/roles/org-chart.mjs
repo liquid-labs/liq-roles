@@ -106,7 +106,7 @@ const func = ({ cache, model }) => async(req, res) => {
 
     await page.waitForSelector('#ready', { timeout : 5000 })
 
-    const canvas = await page.waitForSelector('canvas')
+    await page.waitForSelector('canvas')
 
     const [height, width] = await page.$eval('canvas', el => [el.getAttribute('height'), el.getAttribute('width')])
 

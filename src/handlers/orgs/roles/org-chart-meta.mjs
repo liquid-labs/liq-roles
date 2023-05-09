@@ -55,7 +55,7 @@ const func = ({ model }) => async(req, res) => {
         let handled = false
         // The collapse logic could be more robust
         for (const rootRole of rootRoles) {
-          if (rootRole.name !== roleName && rootRole.impliesRole(roleName) || role.manager === staffMember.email) {
+          if ((rootRole.name !== roleName && rootRole.impliesRole(roleName)) || role.manager === staffMember.email) {
             const rootDatum = data.find((d) => d.email === staffMember.email && d.title === rootRole.name)
             rootDatum.secondaryRoles.push(roleName)
             handled = true

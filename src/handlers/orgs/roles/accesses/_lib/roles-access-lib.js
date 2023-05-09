@@ -99,6 +99,7 @@ class RolesAccessLib {
                 return true
               }
             }
+            return false
           })
           .map(({ type, source }) => {
             return `${type}${includeSource ? ` (${source})` : ''}`

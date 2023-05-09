@@ -81,7 +81,7 @@ const cdeConnectedTech = [
     vendor     : 'Amazon Web Services, Inc.'
   },
   {
-    technology : 'Amazon EKS	Kubernetes',
+    technology : 'Amazon EKS Kubernetes',
     functions  : ['cluster management'],
     vendor     : 'Amazon Web Services, Inc.'
   },
@@ -227,11 +227,12 @@ const generateVendorContent = (techData) => {
 }
 
 const staffSectionTocEntry = ({ sectionHeader, roles }) => {
+  const secTitle = sectionHeader || roles[0]
+
   if (!sectionHeader && roles.length > 1) {
     throw new Error(`Found section definition with multple roles and no section header; section roles: ('${secTitle.join("', '")}').`)
   }
 
-  const secTitle = sectionHeader || roles[0]
   return `[${secTitle}](#${secTitle.toLowerCase().replaceAll(/[^a-z0-9]/g, '-')})`
 }
 

@@ -1,2 +1,2 @@
 export * from './handlers'
-export * from './setup.mjs'
+export * from './setup'

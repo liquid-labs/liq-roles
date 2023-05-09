@@ -1,5 +1,3 @@
-import { toCamelCase, toKebabCase } from 'js-convert-case'
-
 import { commonOutputParams, formatOutput, getOrgFromKey } from '@liquid-labs/liq-handlers-lib'
 
 const method = 'get'
@@ -58,4 +56,4 @@ const applyTransform = ({ res, transformName, ...transformOptions }) => {
   transform({ res, ...transformOptions })
 }
 */
-export { func, path, method }
+export { func, parameters, path, method }

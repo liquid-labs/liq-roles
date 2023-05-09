@@ -1,7 +1,6 @@
 import { format as formatTable } from '@fast-csv/format'
-import { toCamelCase, toKebabCase, toSentenceCase } from 'js-convert-case'
 
-import { formatOutput, getOrgFromKey } from '@liquid-labs/liq-handlers-lib'
+import { getOrgFromKey } from '@liquid-labs/liq-handlers-lib'
 
 import { initializeRolesAccess } from '../roles/accesses/_lib/roles-access-lib'
 
@@ -21,8 +20,7 @@ const createAccessMatrix = ({
 
   const {
     hideServices = false,
-    includeSource = false,
-    ...roleListOptions
+    includeSource = false
   } = req.vars
   let { format = 'csv' } = req.vars
 
@@ -71,9 +69,9 @@ const createAccessMatrix = ({
   const colWidth = headerRow.length
 
   for (const subject of subjectsGenerator({ org, rolesAccess })) {
-  	const row = Array.from({ length : colWidth }, () => null)
+    const row = Array.from({ length : colWidth }, () => null)
 
-  	row[0] = rowLabelGenerator({ org, subject })
+    row[0] = rowLabelGenerator({ org, subject })
 
     const offset = subjectSummaryGenerator === undefined ? 1 : 2
 

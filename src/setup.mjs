@@ -13,7 +13,7 @@ const setup = ({ model, reporter }) => {
       '$(OUT_DIR)/' + reportPath
     ]
 
-    const { policyDataRepoPath, policyRepoPath } = org
+    const { policyRepoPath } = org
 
     org.policies._make.push({
       buildTargets,
