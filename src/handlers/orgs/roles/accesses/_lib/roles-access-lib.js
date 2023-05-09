@@ -130,4 +130,4 @@ const rankAccessType = (type) => {
   return rank
 }
 
-export { initializeRolesAccess }
+export { initializeRolesAccess, rankAccessType, ORDERED_ACCESS_TYPE }
