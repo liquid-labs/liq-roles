@@ -31,11 +31,11 @@
     ]
   },
   "devDependencies": {
+    "@liquid-labs/catalyst-scripts-node-project": "^1.0.0-alpha.15",
     "d3-org-chart": "^2.6.0"
   },
   "dependencies": {
     "@fast-csv/format": "^4.3.5",
-    "@liquid-labs/catalyst-scripts-node-project": "^1.0.0-alpha.14",
     "@liquid-labs/liq-handlers-lib": "^1.0.0-alpha.13",
     "@liquid-labs/liq-roles-lib": "^1.0.0-alpha.2",
     "js-convert-case": "^4.2.0",
