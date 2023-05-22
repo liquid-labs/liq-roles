@@ -1,6 +1,8 @@
 const reportPath = 'security/reports/PCI\\ DSS\\ Roles\\ and\\ Access\\ Report.md'
 
-const setup = ({ model, reporter }) => {
+const setup = ({ app, model, reporter }) => {
+  setupPathResolvers({ app, model })
+
   for (const [orgKey, org] of Object.entries(model.orgs)) {
     if (!org.policies) {
       org.policies = {}
@@ -23,6 +25,16 @@ const setup = ({ model, reporter }) => {
 \tcat ${policyRepoPath}/src/assets/${reportPath.slice(0, -3)}.append.md >> "$@"
 `
     })
+  }
+}
+
+const setupPathResolvers = ({ app, model }) => {
+  app.liq.pathResolvers.roleName = {
+    optionsFetcher : ({ currToken = '', orgKey }) => {
+      const org = model.orgs[orgKey]
+      return org?.innerState.roles.map((r) => r.name) || []
+    },
+    bitReString : '[a-zA-Z_ -]+'
   }
 }
 
