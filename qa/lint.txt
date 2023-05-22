@@ -1,9 +1,0 @@
-Test git rev: 682015713b45af57fbbdf19ba7aebe7bdda26849
-
-/Users/zane/.liq/playground/liquid-labs/liq-roles/src/setup.mjs
-  4:24  error  'app' is not defined         no-undef
-  5:1   error  Trailing spaces not allowed  no-trailing-spaces
-
-✖ 2 problems (2 errors, 0 warnings)
-  1 error and 0 warnings potentially fixable with the `--fix` option.
-
