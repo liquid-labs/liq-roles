@@ -19,7 +19,6 @@ const setup = async ({ app, model, reporter }) => {
 
     const { policyRepoPath } = org
 
-    console.log(`\n-----------2\n${orgKey}\n--------`) // DEBUG
     await loadRolePlugins({ model, orgKey, reporter })
 
     org.policies._make.push({

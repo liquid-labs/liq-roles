@@ -22,7 +22,6 @@ const loadRolePlugins = async({ model, orgKey, reporter, req }) => {
   const pluginDir = fsPath.join(pluginPath, 'node_modules')
 
   if (!fs.existsSync(pluginPkg) || !fs.existsSync(pluginDir)) {
-    console.log('\n------uhhhh\n---------') // DEBUG
     return
   }
 
