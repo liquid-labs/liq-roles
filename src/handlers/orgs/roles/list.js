@@ -1,6 +1,4 @@
-import { toKebabCase } from 'js-convert-case'
-
-import { commonOutputConfig, commonOutputParams, formatOutput, getOrgFromKey } from '@liquid-labs/liq-handlers-lib'
+import { commonOutputParams, formatOutput, getOrgFromKey } from '@liquid-labs/liq-handlers-lib'
 
 import { commonRolesOutputParams } from './lib'
 
@@ -47,10 +45,10 @@ const listFormatter = ({ data: roles, h1 = '', h1End = '', h2 = '', h2End = '', 
   return output
 }
 
-const mdFormatter = ({ data, title }) => pageFormatter({ data, title, h1: '# ', h2: '## ', em: '### '})
+const mdFormatter = ({ data, title }) => pageFormatter({ data, title, h1 : '# ', h2 : '## ', em : '### ' })
 
 const terminalFormatter = ({ data }) =>
-  listFormatter({ data, h1: '<h1>', h1End: '<rst>', h2: '<h2>', h2End: '<rst>', em: '<em>', emEnd: '<rst>' })
+  listFormatter({ data, h1 : '<h1>', h1End : '<rst>', h2 : '<h2>', h2End : '<rst>', em : '<em>', emEnd : '<rst>' })
 
 const textFormatter = ({ data }) => listFormatter({ data })
 

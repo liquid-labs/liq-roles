@@ -11,7 +11,7 @@ const Roles = class extends ItemManager {
 
   constructor({ org, ...rest }) {
     super(Object.assign(
-      // we start with a blank copy so we don't corrupt the 'rest' options object in case the caller hangs onto it for 
+      // we start with a blank copy so we don't corrupt the 'rest' options object in case the caller hangs onto it for
       // some reason
       {}, rest, { additionalItemCreationOptions : { org } }
     ))
@@ -122,20 +122,16 @@ const Roles = class extends ItemManager {
 
   /**
   * Options:
-  * - `all`: equivalent to `includeIndirect=true`, `excludeDesignated=false`, `excludeTitular=false', and
-  *   `excludeStaffRoles=false`.
+  * - `all`: this is the default.
   * - `excludeDesignated`: if true, only include titular roles. Incompatible with `excludeTitular`.
   * - `excludeStaffRoles`: if true, excludes the the global, implicit 'staff' role.
   * - `excludeTitular`: if true, only includes designated roles. Incompatible with `excludeDesignated`.
-  *   TODO: this is no longer valid, but we might want something like, 'include used, not implied' as the default and 'includeAllKnown' as the flag
-  * - `includeIndirect`: if true, include indirect roles which may be defined by the system but are not defined in the org structure.
   */
   list({
     all = false,
     excludeDesignated = false,
     excludeStaffRoles = false,
     excludeTitular = false,
-    includeIndirect = false,
     sortEmploymentStatusFirst = false,
     ...listOptions
   } = {}) {
@@ -148,18 +144,13 @@ const Roles = class extends ItemManager {
     }
 
     if (all === true
-        || (includeIndirect === true
-          && excludeDesignated === false
+        || (excludeDesignated === false
           && excludeStaffRoles === false
           && excludeTitular === false)) {
       return super.list(listOptions)
     }
     const filters = []
 
-    if (includeIndirect === false) {
-      const indirectFilter = notImpliedTitularFilterGenerator(this.#org.orgStructure)
-      // filters.push(indirectFilter)
-    }
     if (excludeDesignated === true) {
       filters.push(notDesignatedFilter)
     }
@@ -209,16 +200,6 @@ const Roles = class extends ItemManager {
 
 const notDesignatedFilter = (role) => role.designated !== true
 const designatedFilter = (role) => role.designated === true
-
-const notImpliedTitularFilterGenerator = (orgStructure) => (role) => {
-  if (role.designated === true) return true
-  const node = orgStructure.getNodeByRoleName(role.name)
-  const result = !!node && (node && !node.implied)// !!role.designated || !!node
-  // console.log(`testing ${role.name}:\n  node:     ${!!node}; not implied: ${!node.implied} designated? ${role.designated}; node: ${node}\nresult: ${result}`)
-  // console.log(`testing ${role.name}: ${new String(result).toUpperCase()}\n  node:     ${!!node}; not implied: ${node ? !node.implied : '-'}\n`)
-  return result
-  // !role.designated && orgStructure.getNodeByRoleName(role.name)
-}
 
 const excludeStaffRolesFilter = (r) => {
   const { name } = r

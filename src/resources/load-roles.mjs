@@ -3,10 +3,9 @@ import * as fsPath from 'node:path'
 
 import yaml from 'js-yaml'
 
-import { Role } from './Role'
 import { Roles } from './Roles'
 
-const loadRoles = async ({ org }) => {
+const loadRoles = async({ org }) => {
   const items = []
   for (const { path } of org.rolePlugins) {
     const yamlPath = fsPath.join(path, 'policy', 'roles.yaml')
