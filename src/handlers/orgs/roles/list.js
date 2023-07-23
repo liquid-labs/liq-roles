@@ -1,6 +1,4 @@
-import { toKebabCase } from 'js-convert-case'
-
-import { commonOutputConfig, commonOutputParams, formatOutput, getOrgFromKey } from '@liquid-labs/liq-handlers-lib'
+import { commonOutputParams, formatOutput, getOrgFromKey } from '@liquid-labs/liq-handlers-lib'
 
 import { commonRolesOutputParams } from './lib'
 
@@ -10,27 +8,49 @@ const path = ['orgs', ':orgKey', 'roles', 'list']
 const parameters = [...commonOutputParams()]
 parameters.push(...commonRolesOutputParams)
 
-const mdFormatter = (roles, title) => {
-  const markdownBuf = [`# ${title}\n`]
-  for (const { name, summary, superRole, implies = [] } of roles) {
-    markdownBuf.push(
-      `## ${name}\n`,
-      '### Summary\n',
-      summary + '\n'
+const pageFormatter = ({ data: roles, title, h1 = '', h1End = '', h2 = '', h2End = '', em = '', emEnd = '' }) => {
+  const lines = []
+  if (title !== undefined) {
+    lines.push(`${h1}${title}${h1End}\n\n`)
+  }
+  for (const { name, summary, implies } of roles) {
+    lines.push(
+      `${h2}${name}${h2End}\n\n`,
+      `${em}Summary${emEnd}\n`,
+      summary + '\n\n'
     )
-    if (superRole || implies.length > 0) {
-      markdownBuf.push('### Implies\n')
-      if (superRole && implies.findIndex((i) => i.name === superRole.name) === -1) {
-        implies.unshift({ name : superRole.name, mngrProtocol : 'self' })
-      }
+    if (implies !== undefined) {
+      lines.push(`${em}Implies${emEnd}\n`)
       for (const { name: impliedName } of implies) {
-        markdownBuf.push(`- [${impliedName}](#${toKebabCase(impliedName)})`)
+        lines.push(`- ${impliedName}\n`)
       }
-      markdownBuf.push('\n')
+      lines.push('\n')
     }
   }
-  return markdownBuf.join('\n')
+  lines.pop() // last '\n' is unecessary
+  return lines.join('')
 }
+
+const listFormatter = ({ data: roles, h1 = '', h1End = '', h2 = '', h2End = '', em = '', emEnd = '' }) => {
+  let output = ''
+  for (const { name, summary, implies } of roles) {
+    output += `- ${h2}${name}${h2End}: ${summary}`
+    if (implies !== undefined) {
+      output += `\n  ${em}Implies:${emEnd} ${implies.map(({ name }) => name).join(', ')}\n`
+    }
+    else {
+      output += '\n'
+    }
+  }
+  return output
+}
+
+const mdFormatter = ({ data, title }) => pageFormatter({ data, title, h1 : '# ', h2 : '## ', em : '### ' })
+
+const terminalFormatter = ({ data }) =>
+  listFormatter({ data, h1 : '<h1>', h1End : '<rst>', h2 : '<h2>', h2End : '<rst>', em : '<em>', emEnd : '<rst>' })
+
+const textFormatter = ({ data }) => listFormatter({ data })
 
 const func = ({ model, reporter }) => (req, res) => {
   const org = getOrgFromKey({ model, params : req.vars, res })
@@ -42,10 +62,13 @@ const func = ({ model, reporter }) => (req, res) => {
     basicTitle : 'Roles Report',
     data       : roles,
     mdFormatter,
+    terminalFormatter,
+    textFormatter,
     reporter,
     req,
     res,
-    ...commonOutputConfig(org.roles, req.query)
+    ...org.roles.constructor.itemConfig,
+    ...req.vars
   })
 }
 

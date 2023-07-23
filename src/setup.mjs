@@ -1,9 +1,21 @@
 import { loadRolePlugins } from './handlers/orgs/roles/plugins/_lib/load-role-plugins'
+import { loadRoles } from './resources/load-roles'
 
 const reportPath = 'security/reports/PCI\\ DSS\\ Roles\\ and\\ Access\\ Report.md'
 
-const setup = async ({ app, model, reporter }) => {
+const setup = async({ app, model, reporter }) => {
   setupPathResolvers({ app, model })
+
+  app.liq.orgSetupMethods.push({
+    name : 'load roles plugins',
+    func : loadRolePlugins
+  })
+
+  app.liq.orgSetupMethods.push({
+    name : 'load roles',
+    deps : ['load roles plugins'],
+    func : loadRoles
+  })
 
   for (const [orgKey, org] of Object.entries(model.orgs)) {
     if (!org.policies) {
@@ -18,8 +30,6 @@ const setup = async ({ app, model, reporter }) => {
     ]
 
     const { policyRepoPath } = org
-
-    await loadRolePlugins({ model, orgKey, reporter })
 
     org.policies._make.push({
       buildTargets,
@@ -36,7 +46,7 @@ const setupPathResolvers = ({ app, model }) => {
   app.liq.pathResolvers.roleName = {
     optionsFetcher : ({ currToken = '', orgKey }) => {
       const org = model.orgs[orgKey]
-      return org.roles.list({ rawData: true }).map((r) => r.name) || []
+      return org.roles.list({ rawData : true }).map((r) => r.name) || []
     },
     bitReString : '[a-zA-Z_ -]+'
   }

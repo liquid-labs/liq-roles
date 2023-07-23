@@ -5,7 +5,7 @@ const hostVersionRetriever = ({ app }) =>
 
 const installedPluginsRetriever = ({ model, req }) => {
   const { orgKey } = req.vars
-  console.log("model.orgs[orgKey].rolePlugins:", model.orgs[orgKey].rolePlugins)
+  console.log('model.orgs[orgKey].rolePlugins:', model.orgs[orgKey].rolePlugins)
   return model.orgs[orgKey].rolePlugins
 }
 

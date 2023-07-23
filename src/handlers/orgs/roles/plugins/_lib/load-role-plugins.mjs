@@ -5,9 +5,10 @@ import findPlugins from 'find-plugins'
 
 import { rolesPluginDir } from './roles-plugin-dir'
 
-const loadRolePlugins = async({ model, orgKey, reporter, req }) => {
-  orgKey = orgKey || req.vars.orgKey
+const loadRolePlugins = async({ model, orgKey, reporter }) => {
+  console.log('uhhh') // DEBUG
   const org = model.orgs[orgKey]
+  if (org === undefined) return
 
   org.rolePlugins = []
 
@@ -41,9 +42,7 @@ const loadRolePlugins = async({ model, orgKey, reporter, req }) => {
     const importPath = fsPath.join(dir, main)
     const { name = 'UNKNOWN', summary = 'NONE' } = require(importPath) // await import(`${dir}/${main}`) || {}
 
-    console.log('\nname:', name)
-
-    org.rolePlugins.push({ name, summary, npmName, version })
+    org.rolePlugins.push({ name, summary, npmName, path : dir, version })
   }
 }
 
