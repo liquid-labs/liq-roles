@@ -32,16 +32,20 @@
   },
   "devDependencies": {
     "@liquid-labs/catalyst-scripts-node-project": "^1.0.0-alpha.15",
+    "@liquid-labs/liq-roles-schema": "^1.0.0-alpha.1",
     "d3-org-chart": "^2.6.0"
   },
   "dependencies": {
     "@fast-csv/format": "^4.3.5",
+    "@liquid-labs/condition-eval": "^1.0.0-alpha.18",
     "@liquid-labs/liq-defaults": "^1.0.0-alpha.2",
     "@liquid-labs/liq-handlers-lib": "^1.0.0-alpha.15",
     "@liquid-labs/liq-plugins-lib": "^1.0.0-alpha.2",
     "@liquid-labs/liq-roles-lib": "^1.0.0-alpha.2",
+    "@liquid-labs/resource-model": "^1.0.0-alpha.8",
     "find-plugins": "^1.1.7",
     "js-convert-case": "^4.2.0",
+    "js-yaml": "^4.1.0",
     "puppeteer": "^19.8.5"
   }
 }
