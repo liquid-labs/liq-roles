@@ -32,7 +32,8 @@
   },
   "devDependencies": {
     "@liquid-labs/catalyst-scripts-node-project": "^1.0.0-alpha.15",
-    "@liquid-labs/liq-roles-schema": "^1.0.0-alpha.1",
+    "@liquid-labs/liq-roles-schema": "^1.0.0-alpha.4",
+    "@liquid-labs/liq-test-lib": "^1.0.0-alpha.2",
     "d3-org-chart": "^2.6.0"
   },
   "dependencies": {

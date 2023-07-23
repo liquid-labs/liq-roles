@@ -167,7 +167,7 @@ const Roles = class extends ItemManager {
       filters.push(excludeStaffRolesFilter)
     }
     if (excludeTitular === true) {
-      filters.push(notTitularFilter)
+      filters.push(designatedFilter)
     }
     // it's included if no one vetos it.
     const filter = (r) => {
@@ -207,8 +207,8 @@ const Roles = class extends ItemManager {
   }
 }
 
-const notDesignatedFilter = (role) => !role.designated
-const notTitularFilter = (role) => !role.titular
+const notDesignatedFilter = (role) => role.designated !== true
+const designatedFilter = (role) => role.designated === true
 
 const notImpliedTitularFilterGenerator = (orgStructure) => (role) => {
   if (role.designated === true) return true
