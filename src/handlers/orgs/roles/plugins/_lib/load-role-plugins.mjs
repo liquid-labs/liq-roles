@@ -6,7 +6,6 @@ import findPlugins from 'find-plugins'
 import { rolesPluginDir } from './roles-plugin-dir'
 
 const loadRolePlugins = async({ model, orgKey, reporter }) => {
-  console.log('uhhh') // DEBUG
   const org = model.orgs[orgKey]
   if (org === undefined) return
 
