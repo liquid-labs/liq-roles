@@ -9,6 +9,7 @@
     "lint:fix": "make lint-fix",
     "prepare": "! test -f Makefile || make build",
     "test": "make test",
+    "prepare": "make qa && make build",
     "preversion": "npm test && make lint",
     "qa": "make qa"
   },
