@@ -1,15 +1,14 @@
 {
   "name": "@liquid-labs/liq-roles",
-  "version": "1.0.0-alpha.1",
+  "version": "1.0.0-alpha.2",
   "description": "Adds support for company roles to to liq.",
   "main": "dist/liq-roles.js",
   "scripts": {
     "build": "make",
     "lint": "make lint",
     "lint:fix": "make lint-fix",
-    "prepare": "! test -f Makefile || make build",
-    "test": "make test",
     "prepare": "make qa && make build",
+    "test": "make test",
     "preversion": "npm test && make lint",
     "qa": "make qa"
   },
