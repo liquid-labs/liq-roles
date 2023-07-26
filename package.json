@@ -1,6 +1,6 @@
 {
   "name": "@liquid-labs/liq-roles",
-  "version": "1.0.0-alpha.4",
+  "version": "1.0.0-alpha.5",
   "description": "Adds support for company roles to to liq.",
   "main": "dist/liq-roles.js",
   "scripts": {
