@@ -24,7 +24,7 @@ const loadRoles = async({ org }) => {
           else { throw e }
         }
       }
-      else { console.log('blah'); throw e }
+      else { throw e }
     }
 
     items.push(...rolesData)
