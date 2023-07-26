@@ -7,7 +7,7 @@
     "build": "make",
     "lint": "make lint",
     "lint:fix": "make lint-fix",
-    "prepare": "make qa && make build",
+    "prepare": "make build",
     "test": "make test",
     "preversion": "npm test && make lint",
     "qa": "make qa"
