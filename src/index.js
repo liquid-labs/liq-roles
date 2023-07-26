@@ -1,4 +1,5 @@
 export * from './handlers'
+export * from './resources'
 export * from './setup'
 
 const name = 'roles'
