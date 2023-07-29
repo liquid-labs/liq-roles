@@ -21,7 +21,7 @@ const pageFormatter = ({ data: roles, title, h1 = '', h1End = '', h2 = '', h2End
     )
     if (implies !== undefined) {
       lines.push(`${em}Implies${emEnd}\n`)
-      for (const { name: impliedName } of implies) {
+      for (const impliedName of implies) {
         lines.push(`- ${impliedName}\n`)
       }
       lines.push('\n')
@@ -36,7 +36,7 @@ const listFormatter = ({ data: roles, h1 = '', h1End = '', h2 = '', h2End = '', 
   for (const { name, summary, implies } of roles) {
     output += `- ${h2}${name}${h2End}: ${summary}`
     if (implies !== undefined) {
-      output += `\n  ${em}Implies:${emEnd} ${implies.map(({ name }) => name).join(', ')}\n`
+      output += `\n  ${em}Implies:${emEnd} ${implies.join(', ')}\n`
     }
     else {
       output += '\n'

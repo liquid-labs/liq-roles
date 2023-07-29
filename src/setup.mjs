@@ -1,3 +1,4 @@
+import { loadJobs } from './resources/load-jobs'
 import { loadRolePlugins } from './handlers/orgs/roles/plugins/_lib/load-role-plugins'
 import { loadRoles } from './resources/load-roles'
 
@@ -15,6 +16,12 @@ const setup = async({ app, model, reporter }) => {
     name : 'load roles',
     deps : ['load roles plugins'],
     func : loadRoles
+  })
+
+  app.liq.orgSetupMethods.push({
+    name : 'load jobs',
+    deps : ['load roles'],
+    func : loadJobs
   })
 
   for (const [orgKey, org] of Object.entries(model.orgs)) {

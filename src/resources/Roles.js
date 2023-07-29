@@ -37,30 +37,20 @@ const Roles = class extends ItemManager {
     let result = super.get(name, superOptions)
     const {
       errMsgGen,
-      includeQualifier = false,
       required = false,
       rawData = false
     } = options
 
-    if (includeQualifier === true || (result === undefined && fuzzy === true)) {
-      let qualifier
+    if (result === undefined && fuzzy === true) {
       // now fuzzy match if desired
       if (result === undefined && fuzzy === true) {
         const matchingRoles = this.list({ rawData : true, all : true }).filter((role) => {
           if (role.matcher !== undefined) {
             try {
-              const { antiPattern, pattern, qualifierGroup } = role.matcher
+              const { antiPattern, pattern } = role.matcher
               const match = name.match(new RegExp(pattern, 'i'))
               if (match) {
-                // check anti-pattern first and bail out to avoid setting qualifier for disqualified match
-                if (antiPattern && name.match(new RegExp(antiPattern, 'i'))) {
-                  return false
-                }
-
-                if (qualifierGroup) {
-                  qualifier = match[qualifierGroup]
-                }
-                return true
+                return !(antiPattern && name.match(new RegExp(antiPattern, 'i')))
               }
             }
             catch (e) {
@@ -84,12 +74,8 @@ const Roles = class extends ItemManager {
 
       if (rawData !== true && result) result = new Role(result, { org : this.#org })
 
-      if (includeQualifier === true) {
-        return [result, qualifier]
-      }
-      else {
-        return result
-      }
+      
+      return result
     }
 
     return result

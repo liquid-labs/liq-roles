@@ -91,9 +91,8 @@ const Role = class extends Item {
         mergeDuties(this.#allMyDuties, edge.duties)
       }
       // now, let's see if there are
-      const { superRole, implies = [] } = edge
-      const implyAll = superRole ? implies.concat([{ name : superRole }]) : implies
-      for (const { name } of implyAll) {
+      const { implies = [] } = edge
+      for (const name of implies) {
         frontier.push(this.#org.roles.get(name, { required : true }))
       }
     }
@@ -128,8 +127,7 @@ const Role = class extends Item {
 
     const frontierNames = []
     const loadFrontier = (role) => {
-      if (role.superRole) frontierNames.push(role.superRole)
-      if (role.implies) frontierNames.push(...role.implies.map((r) => r.name))
+      if (role.implies) frontierNames.push(...role.implies)
     }
     loadFrontier(this)
 
@@ -169,11 +167,8 @@ const Role = class extends Item {
       return cachedResponse
     }
     // else, we gotta figure it out
-    const toCheck = (this.implies && this.implies.map(r => r.name)) || []
-    if (this.superRole) {
-      toCheck.unshift(this.superRole) // is a name reference
-    }
-
+    const toCheck = this.implies || []
+ 
     for (const impliedRoleName of toCheck) {
       if (impliedRoleName === roleName) {
         myCache[roleName] = true
@@ -270,7 +265,7 @@ Item.bindCreationConfig({
   dataCleaner   : (data) => { delete data.id; return data },
   dataFlattener : (data) => {
     const { implies, aliases, duties, matcher } = data
-    if (data.implies) { data.implies = `${implies.name};${implies.mngrProtocol}` }
+    if (data.implies) { data.implies = implies.join('; ') }
     if (data.aliases) { data.aliases = aliases.join('; ') }
     if (data.description) { data.description = data.description.link }
     if (data.duties) { data.duties = duties.map((d) => d.description).join('; ') }
