@@ -6,8 +6,18 @@ import { Job } from './Job'
 * Public API for managing jobs.
 */
 const Jobs = class extends ItemManager {
-  constructor(options) {
-    super(options)
+  #org
+
+  constructor({ org, additionalItemCreationOptions, ...rest }) {
+    super(Object.assign(
+      {},
+      rest,
+      {
+        additionalItemCreationOptions : Object.assign({}, additionalItemCreationOptions, { org }),
+      }
+    ))
+
+    this.#org = org
   }
 }
 
