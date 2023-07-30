@@ -7,12 +7,15 @@ import { rolesPluginDir } from './roles-plugin-dir'
 
 const loadRolePlugins = async({ model, orgKey, reporter }) => {
   const org = model.orgs[orgKey]
-  if (org === undefined) return
+  if (org === undefined) {
+    throw new Error(`Did not find org '${orgKey}'.`)
+  }
 
   org.rolePlugins = []
 
   const rolesProject = org.getSetting('org.STAFF_REPO')
   if (rolesProject === undefined) {
+    console.warn('bailing out of loadRolePlugins...')
     return
   }
   const [orgBit, projectBit] = rolesProject.split('/')

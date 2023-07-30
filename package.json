@@ -9,7 +9,7 @@
     "lint:fix": "make lint-fix",
     "prepare": "make build",
     "test": "make test",
-    "preversion": "npm test && make lint",
+    "preversion": "make qa && make lint",
     "qa": "make qa"
   },
   "keywords": [],
@@ -22,6 +22,9 @@
   "bugs": {
     "url": "https://github.com/liquid-labs/liq-roles/issues"
   },
+  "engines": {
+    "node": ">=18.0.0"
+  },
   "homepage": "https://github.com/liquid-labs/liq-roles#readme",
   "liq": {
     "orgBase": "git@github.com:liquid-labs/liquid-labs.git",
@@ -33,7 +36,8 @@
   "devDependencies": {
     "@liquid-labs/catalyst-scripts-node-project": "^1.0.0-alpha.15",
     "@liquid-labs/liq-roles-schema": "^1.0.0-alpha.4",
-    "@liquid-labs/liq-test-lib": "^1.0.0-alpha.2",
+    "@liquid-labs/liq-test-lib": "^1.0.0-alpha.3",
+    "@liquid-labs/shell-toolkit": "^1.0.0-alpha.6",
     "d3-org-chart": "^2.6.0"
   },
   "dependencies": {
