@@ -168,7 +168,7 @@ const Role = class extends Item {
     }
     // else, we gotta figure it out
     const toCheck = this.implies || []
- 
+
     for (const impliedRoleName of toCheck) {
       if (impliedRoleName === roleName) {
         myCache[roleName] = true

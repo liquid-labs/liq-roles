@@ -8,9 +8,8 @@ import { LIQ_PLAYGROUND } from '@liquid-labs/liq-defaults'
 import { Jobs } from './Jobs'
 
 const loadJobs = async({ org }) => {
-  const items = []
   const staffRepo = org.requireSetting('org.STAFF_REPO')
-  const [ staffOrg, staffProj ] = staffRepo.split('/')
+  const [staffOrg, staffProj] = staffRepo.split('/')
   const jobsDataDir = fsPath.join(LIQ_PLAYGROUND(), staffOrg, staffProj, 'data', 'orgs')
   const jobsYamlPath = fsPath.join(jobsDataDir, 'jobs.yaml')
   let jobsData
@@ -24,7 +23,7 @@ const loadJobs = async({ org }) => {
     }
   }
 
-  const jobs = new Jobs({ items: jobsData, org })
+  const jobs = new Jobs({ items : jobsData, org })
   org.bindRootItemManager(jobs)
 }
 

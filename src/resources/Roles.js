@@ -74,7 +74,6 @@ const Roles = class extends ItemManager {
 
       if (rawData !== true && result) result = new Role(result, { org : this.#org })
 
-      
       return result
     }
 

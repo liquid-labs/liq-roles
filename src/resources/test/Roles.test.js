@@ -4,26 +4,19 @@ import * as fsPath from 'node:path'
 
 import yaml from 'js-yaml'
 
-import { playgroundSimplePath } from '@liquid-labs/liq-test-lib'
 import { tryExec } from '@liquid-labs/shell-toolkit'
 
 import { Roles } from '../Roles'
 
-const /* mock */org = {
-  orgStructure : {
-    getNodeByRoleName : (name) => {
-      return Object.assign({ implied : false }, rolesData.find((r) => r.name === name))
-    }
-  }
-}
+const /* mock */org = {}
 
 describe('Roles', () => {
   let testRoles
   beforeAll(() => {
-    const rolesPkgDir = tryExec(`npm explore @liquid-labs/liq-test-lib -- 'cd $(pwd)/dist/data/playground-simple/orgA/projectA01/data/roles-plugins && npm explore @liquid-labs/roles-core -- pwd'`)
+    const rolesPkgDir = tryExec('npm explore @liquid-labs/liq-test-lib -- \'cd $(pwd)/dist/data/playground-simple/orgA/projectA01/data/roles-plugins && npm explore @liquid-labs/roles-core -- pwd\'')
       .stdout.trim()
     const rolesPath = fsPath.join(rolesPkgDir, 'policy', 'roles.yaml')
-    const rolesData = yaml.load(fs.readFileSync(rolesPath, { encoding: 'utf8' }))
+    const rolesData = yaml.load(fs.readFileSync(rolesPath, { encoding : 'utf8' }))
     testRoles = new Roles({ items : rolesData, org })
   })
 

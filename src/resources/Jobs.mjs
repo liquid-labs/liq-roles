@@ -13,7 +13,7 @@ const Jobs = class extends ItemManager {
       {},
       rest,
       {
-        additionalItemCreationOptions : Object.assign({}, additionalItemCreationOptions, { org }),
+        additionalItemCreationOptions : Object.assign({}, additionalItemCreationOptions, { org })
       }
     ))
 
