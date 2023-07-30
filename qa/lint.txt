@@ -1,0 +1,38 @@
+Test git rev: cbae099f31b7730012c4e525000782f8a8748495
+
+/Users/zane/.liq/playground/liquid-labs/liq-roles/src/resources/Job.mjs
+  12:40  error  A space is required before '}'     object-curly-spacing
+  17:45  error  Missing space after key 'fuzzy'    key-spacing
+  17:58  error  Missing space after key 'rawData'  key-spacing
+
+/Users/zane/.liq/playground/liquid-labs/liq-roles/src/resources/Jobs.mjs
+  16:98  error  Unexpected trailing comma                      comma-dangle
+  31:16  error  Newline required at end of file but not found  eol-last
+
+/Users/zane/.liq/playground/liquid-labs/liq-roles/src/resources/Role.js
+  171:1  error  Trailing spaces not allowed  no-trailing-spaces
+
+/Users/zane/.liq/playground/liquid-labs/liq-roles/src/resources/Roles.js
+  77:1  error  Trailing spaces not allowed         no-trailing-spaces
+  77:1  error  More than 1 blank line not allowed  no-multiple-empty-lines
+
+/Users/zane/.liq/playground/liquid-labs/liq-roles/src/resources/load-jobs.mjs
+  11:9   error  'items' is assigned a value but never used  no-unused-vars
+  13:10  error  There should be no space after '['          array-bracket-spacing
+  13:30  error  There should be no space before ']'         array-bracket-spacing
+  27:27  error  Missing space after key 'items'             key-spacing
+
+/Users/zane/.liq/playground/liquid-labs/liq-roles/src/resources/test/Role.test.js
+  12:7   error  'rolesDataPath' is assigned a value but never used  no-unused-vars
+  21:33  error  Strings must use singlequote                        quotes
+  24:62  error  Missing space after key 'encoding'                  key-spacing
+
+/Users/zane/.liq/playground/liquid-labs/liq-roles/src/resources/test/Roles.test.js
+   7:10  error  'playgroundSimplePath' is defined but never used  no-unused-vars
+  15:49  error  'rolesData' is not defined                        no-undef
+  23:33  error  Strings must use singlequote                      quotes
+  26:62  error  Missing space after key 'encoding'                key-spacing
+
+✖ 19 problems (19 errors, 0 warnings)
+  15 errors and 0 warnings potentially fixable with the `--fix` option.
+
