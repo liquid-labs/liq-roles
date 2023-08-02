@@ -2,8 +2,6 @@ import { loadJobs } from './resources/load-jobs'
 import { loadRolePlugins } from './handlers/orgs/roles/plugins/_lib/load-role-plugins'
 import { loadRoles } from './resources/load-roles'
 
-const reportPath = 'security/reports/PCI\\ DSS\\ Roles\\ and\\ Access\\ Report.md'
-
 const setup = async({ app, model, reporter }) => {
   setupPathResolvers({ app, model })
 
@@ -25,6 +23,7 @@ const setup = async({ app, model, reporter }) => {
   })
 
 /* TODO: re-enable this as a policy plugin
+  const reportPath = 'security/reports/PCI\\ DSS\\ Roles\\ and\\ Access\\ Report.md'
   for (const [orgKey, org] of Object.entries(model.orgs)) {
     if (!org.policies) {
       org.policies = {}
@@ -47,7 +46,7 @@ const setup = async({ app, model, reporter }) => {
 \tcat ${policyRepoPath}/src/assets/${reportPath.slice(0, -3)}.append.md >> "$@"
 `
     })
-  }*/
+  } */
 }
 
 const setupPathResolvers = ({ app, model }) => {
