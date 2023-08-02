@@ -24,6 +24,7 @@ const setup = async({ app, model, reporter }) => {
     func : loadJobs
   })
 
+/* TODO: re-enable this as a policy plugin
   for (const [orgKey, org] of Object.entries(model.orgs)) {
     if (!org.policies) {
       org.policies = {}
@@ -46,7 +47,7 @@ const setup = async({ app, model, reporter }) => {
 \tcat ${policyRepoPath}/src/assets/${reportPath.slice(0, -3)}.append.md >> "$@"
 `
     })
-  }
+  }*/
 }
 
 const setupPathResolvers = ({ app, model }) => {
