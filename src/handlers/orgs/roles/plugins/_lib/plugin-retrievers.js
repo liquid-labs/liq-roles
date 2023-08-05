@@ -1,7 +1,7 @@
 import { rolesPluginDir } from './roles-plugin-dir'
 
 const hostVersionRetriever = ({ app }) =>
-  app.liq.handlerPlugins.find(({ npmName }) => npmName === '@liquid-labs/liq-roles')?.version
+  app.ext.handlerPlugins.find(({ npmName }) => npmName === '@liquid-labs/liq-roles')?.version
 
 const installedPluginsRetriever = ({ model, req }) => {
   const { orgKey } = req.vars
