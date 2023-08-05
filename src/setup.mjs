@@ -5,21 +5,26 @@ import { loadRoles } from './resources/load-roles'
 const setup = async({ app, model, reporter }) => {
   setupPathResolvers({ app, model })
 
-  app.liq.orgSetupMethods.push({
-    name : 'load roles plugins',
-    func : loadRolePlugins
-  })
+  app.addSetupTask({
+    name : 'load role org tasks',
+    func : ({ app }) => {
+      app.ext.orgSetupMethods.push({
+        name : 'load roles plugins',
+        func : loadRolePlugins
+      })
 
-  app.liq.orgSetupMethods.push({
-    name : 'load roles',
-    deps : ['load roles plugins'],
-    func : loadRoles
-  })
+      app.ext.orgSetupMethods.push({
+        name : 'load roles',
+        deps : ['load roles plugins'],
+        func : loadRoles
+      })
 
-  app.liq.orgSetupMethods.push({
-    name : 'load jobs',
-    deps : ['load roles'],
-    func : loadJobs
+      app.ext.orgSetupMethods.push({
+        name : 'load jobs',
+        deps : ['load roles'],
+        func : loadJobs
+      })
+    }
   })
 
 /* TODO: re-enable this as a policy plugin
@@ -50,7 +55,7 @@ const setup = async({ app, model, reporter }) => {
 }
 
 const setupPathResolvers = ({ app, model }) => {
-  app.liq.pathResolvers.roleName = {
+  app.ext.pathResolvers.roleName = {
     optionsFetcher : ({ currToken = '', orgKey }) => {
       const org = model.orgs[orgKey]
       return org.roles.list({ rawData : true }).map((r) => r.name) || []
@@ -58,7 +63,7 @@ const setupPathResolvers = ({ app, model }) => {
     bitReString : '[a-zA-Z_ -]+'
   }
 
-  app.liq.pathResolvers.rolePluginName = {
+  app.ext.pathResolvers.rolePluginName = {
     bitReString    : '[a-z][a-z0-9-]*',
     optionsFetcher : ({ model, orgKey }) => {
       const org = model.orgs[orgKey]
