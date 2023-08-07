@@ -15,10 +15,10 @@ const func = ({ model }) => (req, res) => {
 
   const job = org.jobs.get(jobName)
   if (!job) {
-    res.status(404).json({ message : `No such role '${roleName}' found.` })
+    res.status(404).json({ message : `No such job '${title}' found.` })
   }
   else {
-    httpSmartResponse({ data: job, req, res })
+    httpSmartResponse({ data : job, req, res })
   }
 }
 
