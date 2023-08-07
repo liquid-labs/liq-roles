@@ -55,12 +55,20 @@ const setup = async({ app, model, reporter }) => {
 }
 
 const setupPathResolvers = ({ app, model }) => {
+  app.ext.pathResolvers.jobName = {
+    optionsFetcher : ({ currToken = '', orgKey }) => {
+      const org = model.orgs[orgKey]
+      return org.jobs.list({ rawData : true }).map((r) => r.name.replace(' ', '%20')) || []
+    },
+    bitReString : '(?:[a-zA-Z_-]|%20)+'
+  }
+
   app.ext.pathResolvers.roleName = {
     optionsFetcher : ({ currToken = '', orgKey }) => {
       const org = model.orgs[orgKey]
-      return org.roles.list({ rawData : true }).map((r) => r.name) || []
+      return org.roles.list({ rawData : true }).map((r) => r.name.replace(' ', '%20')) || []
     },
-    bitReString : '[a-zA-Z_ -]+'
+    bitReString : '(?:[a-zA-Z_-]|%20)+'
   }
 
   app.ext.pathResolvers.rolePluginName = {
