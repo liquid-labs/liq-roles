@@ -55,7 +55,7 @@ const setup = async({ app, model, reporter }) => {
 }
 
 const setupPathResolvers = ({ app, model }) => {
-  app.ext.pathResolvers.jobName = {
+  app.ext.pathResolvers.jobTitle = {
     optionsFetcher : ({ currToken = '', orgKey }) => {
       const org = model.orgs[orgKey]
       return org.jobs.list({ rawData : true }).map((r) => r.name.replace(' ', '%20')) || []
