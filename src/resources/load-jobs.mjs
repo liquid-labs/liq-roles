@@ -3,14 +3,14 @@ import * as fsPath from 'node:path'
 
 import yaml from 'js-yaml'
 
-import { LIQ_PLAYGROUND } from '@liquid-labs/liq-defaults'
-
 import { Jobs } from './Jobs'
 
-const loadJobs = async({ org }) => {
-  const staffRepo = org.requireSetting('org.STAFF_REPO')
+const loadJobs = async({ app, org }) => {
+  const staffRepo = org.requireSetting('STAFF_REPO')
+  const { projectPath } = app.ext._liqProjects.playgroundMonitor.getProjectData(staffRepo)
+
   const [staffOrg, staffProj] = staffRepo.split('/')
-  const jobsDataDir = fsPath.join(LIQ_PLAYGROUND(), staffOrg, staffProj, 'data', 'orgs')
+  const jobsDataDir = fsPath.join(projectPath, 'data', 'orgs')
   const jobsYamlPath = fsPath.join(jobsDataDir, 'jobs.yaml')
   let jobsData
   try {

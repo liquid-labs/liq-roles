@@ -8,18 +8,18 @@ const setup = async({ app, model, reporter }) => {
   app.addSetupTask({
     name : 'load role org tasks',
     func : ({ app }) => {
-      app.ext.orgSetupMethods.push({
+      app.ext._liqOrgs.orgSetupMethods.push({
         name : 'load roles plugins',
         func : loadRolePlugins
       })
 
-      app.ext.orgSetupMethods.push({
+      app.ext._liqOrgs.orgSetupMethods.push({
         name : 'load roles',
         deps : ['load roles plugins'],
         func : loadRoles
       })
 
-      app.ext.orgSetupMethods.push({
+      app.ext._liqOrgs.orgSetupMethods.push({
         name : 'load jobs',
         deps : ['load roles'],
         func : loadJobs

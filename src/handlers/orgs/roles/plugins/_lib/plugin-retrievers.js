@@ -12,7 +12,7 @@ const installedPluginsRetriever = ({ model, req }) => {
 const pluginPkgDirRetriever = ({ model, req }) => {
   const { orgKey } = req.vars
   const org = model.orgs[orgKey]
-  const rolesRepo = org.requireSetting('org.STAFF_REPO')
+  const rolesRepo = org.requireSetting('STAFF_REPO')
   const [orgBit, projectBit] = rolesRepo.split('/')
 
   return rolesPluginDir({ orgBit, projectBit })
